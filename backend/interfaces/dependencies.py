@@ -1,0 +1,18 @@
+from typing import Annotated
+from fastapi import Depends
+
+from backend.application.repositories.document_type_repository import DocumentTypeRepository
+from backend.application.use_cases.create_document_type_use_case import CreateDocumentTypeUseCase
+from backend.application.use_cases.update_document_type_use_case import UpdateDocumentTypeUseCase
+from backend.infrastructure.database.mysql_dependencies import get_mysql_document_type_repository
+
+
+def get_create_document_type_use_case(
+    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
+) -> CreateDocumentTypeUseCase:
+    return CreateDocumentTypeUseCase(repository=repository)
+
+def get_update_document_type_use_case(
+    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
+) -> UpdateDocumentTypeUseCase:
+    return UpdateDocumentTypeUseCase(repository=repository)
