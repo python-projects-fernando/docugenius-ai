@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, status, Path
 from backend.application.dtos.document_type import CreateDocumentTypeRequest, DocumentTypeResponse, \
-    UpdateDocumentTypeRequest
+    UpdateDocumentTypeRequest, DeleteDocumentTypeResponse
 from backend.application.use_cases.create_document_type_use_case import CreateDocumentTypeUseCase
+from backend.application.use_cases.delete_document_type_use_case import DeleteDocumentTypeUseCase
 from backend.application.use_cases.update_document_type_use_case import UpdateDocumentTypeUseCase
-from backend.interfaces.dependencies import get_create_document_type_use_case, get_update_document_type_use_case
+from backend.interfaces.dependencies import get_create_document_type_use_case, get_update_document_type_use_case, \
+    get_delete_document_type_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-types", tags=["Document Types - Admin"])
@@ -36,3 +38,17 @@ async def update_document_type(
     use_case: UpdateDocumentTypeUseCase = Depends(get_update_document_type_use_case)
 ) -> APIResponse[DocumentTypeResponse]:
     return await use_case.execute(id=id, request_dto=request_dto)
+
+
+@router.delete(
+    "/{id}",
+    response_model=APIResponse[DeleteDocumentTypeResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Delete an existing document type (Admin)",
+    description="Deletes an existing document type by its ID. Access restricted to administrators. Version: v1.",
+)
+async def delete_document_type(
+    id: int = Path(..., title="The ID of the DocumentType to delete"),
+    use_case: DeleteDocumentTypeUseCase = Depends(get_delete_document_type_use_case)
+) -> APIResponse[DeleteDocumentTypeResponse]:
+    return await use_case.execute(id=id)
