@@ -7,7 +7,7 @@ from backend.interfaces.dependencies import get_list_document_types_use_case, ge
     get_get_document_type_by_name_use_case
 from backend.application.dtos.api_response import APIResponse
 
-router = APIRouter(prefix="/document-types", tags=["User - Document Types"])
+router = APIRouter(prefix="/document-types", tags=["Document Types - User"])
 
 @router.get(
     "/",

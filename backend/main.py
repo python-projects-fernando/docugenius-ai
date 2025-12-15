@@ -47,8 +47,8 @@ app.add_middleware(
 )
 
 app.include_router(document_type_router, prefix="/api/v1/admin")
-app.include_router(user_router, prefix="/api/v1/admin")
 app.include_router(user_document_type_router, prefix="/api/v1/user")
+app.include_router(user_router, prefix="/api/v1/admin")
 
 
 @app.get("/")

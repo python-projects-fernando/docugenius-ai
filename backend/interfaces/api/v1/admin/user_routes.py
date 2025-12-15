@@ -6,7 +6,7 @@ from backend.application.use_cases.user.update_user_use_case import UpdateUserUs
 from backend.interfaces.dependencies import get_create_user_use_case, get_update_user_use_case, get_delete_user_use_case
 from backend.application.dtos.api_response import APIResponse
 
-router = APIRouter(prefix="/users", tags=["Admin - Users"])
+router = APIRouter(prefix="/users", tags=["Users - Admin"])
 
 @router.post(
     "/",

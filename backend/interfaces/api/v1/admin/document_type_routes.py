@@ -8,7 +8,7 @@ from backend.interfaces.dependencies import get_create_document_type_use_case, g
     get_delete_document_type_use_case
 from backend.application.dtos.api_response import APIResponse
 
-router = APIRouter(prefix="/document-types", tags=["Admin - Document Types"])
+router = APIRouter(prefix="/document-types", tags=["Document Types - Admin"])
 
 
 @router.post(
