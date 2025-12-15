@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, status, Query
-from backend.application.dtos.document_type import PaginationParams, DocumentTypeListResponse
+from fastapi import APIRouter, Depends, status, Query, Path
+from backend.application.dtos.document_type import PaginationParams, DocumentTypeListResponse, DocumentTypeResponse
+from backend.application.use_cases.get_document_type_by_id_use_case import GetDocumentTypeByIdUseCase
 from backend.application.use_cases.list_document_types_use_case import ListDocumentTypesUseCase
-from backend.interfaces.dependencies import get_list_document_types_use_case
+from backend.interfaces.dependencies import get_list_document_types_use_case, get_get_document_type_by_id_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-types", tags=["Document Types - User"])
@@ -20,3 +21,17 @@ async def list_document_types(
 ) -> APIResponse[DocumentTypeListResponse]:
     pagination_params = PaginationParams(page=page, size=size)
     return await use_case.execute(pagination=pagination_params)
+
+
+@router.get(
+    "/{id}",
+    response_model=APIResponse[DocumentTypeResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get a document type by its ID (User)",
+    description="Retrieves details of a specific document type by its unique identifier. Accessible by regular users. Version: v1.",
+)
+async def get_document_type_by_id(
+    id: int = Path(..., title="The ID of the DocumentType to retrieve"),
+    use_case: GetDocumentTypeByIdUseCase = Depends(get_get_document_type_by_id_use_case)
+) -> APIResponse[DocumentTypeResponse]:
+    return await use_case.execute(document_type_id=id)
