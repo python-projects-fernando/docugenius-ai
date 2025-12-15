@@ -1,8 +1,10 @@
 from typing import Annotated
 from fastapi import Depends
 
+from backend.application.repositories.document_field_repository import DocumentFieldRepository
 from backend.application.repositories.document_type_repository import DocumentTypeRepository
 from backend.application.repositories.user_repository import UserRepository
+from backend.application.use_cases.document_field.create_document_field_use_case import CreateDocumentFieldUseCase
 from backend.application.use_cases.document_type.create_document_type_use_case import CreateDocumentTypeUseCase
 from backend.application.use_cases.document_type.delete_document_type_use_case import DeleteDocumentTypeUseCase
 from backend.application.use_cases.document_type.get_document_type_by_id_use_case import GetDocumentTypeByIdUseCase
@@ -17,39 +19,7 @@ from backend.application.use_cases.user.get_user_by_username_use_case import Get
 from backend.application.use_cases.user.list_users_use_case import ListUsersUseCase
 from backend.application.use_cases.user.update_user_use_case import UpdateUserUseCase
 from backend.infrastructure.database.mysql_dependencies import get_mysql_document_type_repository, \
-    get_mysql_user_repository
-
-
-# Document Type
-def get_create_document_type_use_case(
-    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
-) -> CreateDocumentTypeUseCase:
-    return CreateDocumentTypeUseCase(repository=repository)
-
-def get_update_document_type_use_case(
-    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
-) -> UpdateDocumentTypeUseCase:
-    return UpdateDocumentTypeUseCase(repository=repository)
-
-def get_delete_document_type_use_case(
-    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
-) -> DeleteDocumentTypeUseCase:
-    return DeleteDocumentTypeUseCase(repository=repository)
-
-def get_list_document_types_use_case(
-    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
-) -> ListDocumentTypesUseCase:
-    return ListDocumentTypesUseCase(repository=repository)
-
-def get_get_document_type_by_id_use_case(
-    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
-) -> GetDocumentTypeByIdUseCase:
-    return GetDocumentTypeByIdUseCase(repository=repository)
-
-def get_get_document_type_by_name_use_case(
-    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
-) -> GetDocumentTypeByNameUseCase:
-    return GetDocumentTypeByNameUseCase(repository=repository)
+    get_mysql_user_repository, get_mysql_document_field_repository
 
 
 # User
@@ -87,3 +57,47 @@ def get_list_users_use_case(
     repository: Annotated[UserRepository, Depends(get_mysql_user_repository)]
 ) -> ListUsersUseCase:
     return ListUsersUseCase(repository=repository)
+
+
+# Document Type
+def get_create_document_type_use_case(
+    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
+) -> CreateDocumentTypeUseCase:
+    return CreateDocumentTypeUseCase(repository=repository)
+
+def get_update_document_type_use_case(
+    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
+) -> UpdateDocumentTypeUseCase:
+    return UpdateDocumentTypeUseCase(repository=repository)
+
+def get_delete_document_type_use_case(
+    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
+) -> DeleteDocumentTypeUseCase:
+    return DeleteDocumentTypeUseCase(repository=repository)
+
+def get_list_document_types_use_case(
+    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
+) -> ListDocumentTypesUseCase:
+    return ListDocumentTypesUseCase(repository=repository)
+
+def get_get_document_type_by_id_use_case(
+    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
+) -> GetDocumentTypeByIdUseCase:
+    return GetDocumentTypeByIdUseCase(repository=repository)
+
+def get_get_document_type_by_name_use_case(
+    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
+) -> GetDocumentTypeByNameUseCase:
+    return GetDocumentTypeByNameUseCase(repository=repository)
+
+
+# DOCUMENT FIELD
+def get_create_document_field_use_case(
+    document_field_repo: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)],
+    document_type_repo: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
+) -> CreateDocumentFieldUseCase:
+    return CreateDocumentFieldUseCase(document_field_repository=document_field_repo, document_type_repository=document_type_repo)
+
+
+
+
