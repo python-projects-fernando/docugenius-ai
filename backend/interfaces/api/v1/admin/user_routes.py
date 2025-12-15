@@ -2,8 +2,10 @@ from fastapi import APIRouter, Depends, status, Path
 from backend.application.dtos.user import CreateUserRequest, UserResponse, UpdateUserRequest
 from backend.application.use_cases.user.create_user_use_case import CreateUserUseCase
 from backend.application.use_cases.user.delete_user_use_case import DeleteUserUseCase
+from backend.application.use_cases.user.get_user_by_id_use_case import GetUserByIdUseCase
 from backend.application.use_cases.user.update_user_use_case import UpdateUserUseCase
-from backend.interfaces.dependencies import get_create_user_use_case, get_update_user_use_case, get_delete_user_use_case
+from backend.interfaces.dependencies import get_create_user_use_case, get_update_user_use_case, \
+    get_delete_user_use_case, get_get_user_by_id_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/users", tags=["Users - Admin"])
@@ -48,4 +50,17 @@ async def delete_user(
     id: int = Path(..., title="The ID of the User to delete"),
     use_case: DeleteUserUseCase = Depends(get_delete_user_use_case)
 ) -> APIResponse[bool]:
+    return await use_case.execute(user_id=id)
+
+@router.get(
+    "/by-id/{id}",
+    response_model=APIResponse[UserResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get a user by its ID (Admin)",
+    description="Retrieves details of a specific user by its unique identifier. Access restricted to administrators. Version: v1.",
+)
+async def get_user_by_id(
+    id: int = Path(..., title="The ID of the User to retrieve"),
+    use_case: GetUserByIdUseCase = Depends(get_get_user_by_id_use_case)
+) -> APIResponse[UserResponse]:
     return await use_case.execute(user_id=id)
