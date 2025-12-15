@@ -14,6 +14,7 @@ from backend.application.use_cases.user.delete_user_use_case import DeleteUserUs
 from backend.application.use_cases.user.get_user_by_email_use_case import GetUserByEmailUseCase
 from backend.application.use_cases.user.get_user_by_id_use_case import GetUserByIdUseCase
 from backend.application.use_cases.user.get_user_by_username_use_case import GetUserByUsernameUseCase
+from backend.application.use_cases.user.list_users_use_case import ListUsersUseCase
 from backend.application.use_cases.user.update_user_use_case import UpdateUserUseCase
 from backend.infrastructure.database.mysql_dependencies import get_mysql_document_type_repository, \
     get_mysql_user_repository
@@ -81,3 +82,8 @@ def get_get_user_by_email_use_case(
     repository: Annotated[UserRepository, Depends(get_mysql_user_repository)]
 ) -> GetUserByEmailUseCase:
     return GetUserByEmailUseCase(repository=repository)
+
+def get_list_users_use_case(
+    repository: Annotated[UserRepository, Depends(get_mysql_user_repository)]
+) -> ListUsersUseCase:
+    return ListUsersUseCase(repository=repository)

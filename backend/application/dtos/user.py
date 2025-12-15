@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr, field_validator
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 class CreateUserRequest(BaseModel):
@@ -19,6 +19,7 @@ class UpdateUserRequest(BaseModel):
             raise ValueError("Field cannot be empty or just whitespace.")
         return v.strip() if v else v
 
+
 class UserResponse(BaseModel):
     id: Optional[int] = Field(..., description="The unique identifier of the user. Can be None if not persisted yet.")
     username: str = Field(..., description="The unique username of the user.")
@@ -30,3 +31,11 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UserListResponse(BaseModel):
+    items: List[UserResponse] = Field(..., description="The list of User items for the current page.")
+    total: int = Field(..., description="The total number of items available.")
+    page: int = Field(..., description="The current page number (1-indexed).")
+    size: int = Field(..., description="The number of items per page.")
+    pages: int = Field(..., description="The total number of pages available.")

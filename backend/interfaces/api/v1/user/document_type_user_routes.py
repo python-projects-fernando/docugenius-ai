@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status, Query, Path
-from backend.application.dtos.document_type import PaginationParams, DocumentTypeListResponse, DocumentTypeResponse
+from backend.application.dtos.document_type import DocumentTypeListResponse, DocumentTypeResponse
+from backend.application.dtos.pagination_params import PaginationParams
 from backend.application.use_cases.document_type.get_document_type_by_id_use_case import GetDocumentTypeByIdUseCase
 from backend.application.use_cases.document_type.get_document_type_by_name_use_case import GetDocumentTypeByNameUseCase
 from backend.application.use_cases.document_type.list_document_types_use_case import ListDocumentTypesUseCase

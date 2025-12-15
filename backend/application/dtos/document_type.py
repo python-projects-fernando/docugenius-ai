@@ -25,11 +25,6 @@ class DeleteDocumentTypeResponse(BaseModel):
     deleted_id: int = Field(..., description="The ID of the deleted DocumentType.")
 
 
-class PaginationParams(BaseModel):
-    page: int = Field(default=1, ge=1, description="Page number (1-indexed).")
-    size: int = Field(default=10, ge=1, le=100, description="Number of items per page (max 100).")
-
-
 class DocumentTypeListResponse(BaseModel):
     items: List[DocumentTypeResponse] = Field(..., description="The list of DocumentType items for the current page.")
     total: int = Field(..., description="The total number of items available.")
