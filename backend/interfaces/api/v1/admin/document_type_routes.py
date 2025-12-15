@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, status, Path
 from backend.application.dtos.document_type import CreateDocumentTypeRequest, DocumentTypeResponse, \
     UpdateDocumentTypeRequest, DeleteDocumentTypeResponse
-from backend.application.use_cases.create_document_type_use_case import CreateDocumentTypeUseCase
-from backend.application.use_cases.delete_document_type_use_case import DeleteDocumentTypeUseCase
-from backend.application.use_cases.update_document_type_use_case import UpdateDocumentTypeUseCase
+from backend.application.use_cases.document_type.create_document_type_use_case import CreateDocumentTypeUseCase
+from backend.application.use_cases.document_type.delete_document_type_use_case import DeleteDocumentTypeUseCase
+from backend.application.use_cases.document_type.update_document_type_use_case import UpdateDocumentTypeUseCase
 from backend.interfaces.dependencies import get_create_document_type_use_case, get_update_document_type_use_case, \
     get_delete_document_type_use_case
 from backend.application.dtos.api_response import APIResponse
