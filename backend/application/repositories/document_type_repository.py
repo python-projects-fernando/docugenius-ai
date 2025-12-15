@@ -19,3 +19,9 @@ class DocumentTypeRepository(Protocol):
 
     async def delete(self, id: int) -> bool:
         ...
+
+    async def find_all_paginated(self, offset: int, limit: int) -> List[DocumentType]:
+        ...
+
+    async def count_all(self) -> int:
+        ...
