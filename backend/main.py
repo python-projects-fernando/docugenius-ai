@@ -5,6 +5,7 @@ from backend.infrastructure.database.mysql_config import engine, async_sessionma
 from fastapi.middleware.cors import CORSMiddleware
 from backend.interfaces.api.v1.admin.document_type_routes import router as document_type_router
 from backend.interfaces.api.v1.user.document_type_user_routes import router as user_document_type_router
+from backend.interfaces.api.v1.admin.user_routes import router as user_router
 from sqlalchemy import text
 
 
@@ -46,7 +47,9 @@ app.add_middleware(
 )
 
 app.include_router(document_type_router, prefix="/api/v1/admin")
+app.include_router(user_router, prefix="/api/v1/admin")
 app.include_router(user_document_type_router, prefix="/api/v1/user")
+
 
 @app.get("/")
 async def root():

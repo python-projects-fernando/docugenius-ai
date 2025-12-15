@@ -1,7 +1,9 @@
 fastapi
 uvicorn[standard]
 pydantic>=2.0
+pydantic[email]
 sqlalchemy==2.0.43
 aiomysql
+bcrypt
 python-dotenv
 huggingface_hub
