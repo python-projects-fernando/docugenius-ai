@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, status, Path
 from backend.application.dtos.user import CreateUserRequest, UserResponse, UpdateUserRequest
 from backend.application.use_cases.user.create_user_use_case import CreateUserUseCase
+from backend.application.use_cases.user.delete_user_use_case import DeleteUserUseCase
 from backend.application.use_cases.user.update_user_use_case import UpdateUserUseCase
-from backend.interfaces.dependencies import get_create_user_use_case, get_update_user_use_case
+from backend.interfaces.dependencies import get_create_user_use_case, get_update_user_use_case, get_delete_user_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/users", tags=["Admin - Users"])
@@ -34,3 +35,17 @@ async def update_user(
     use_case: UpdateUserUseCase = Depends(get_update_user_use_case)
 ) -> APIResponse[UserResponse]:
     return await use_case.execute(user_id=id, request_dto=request_dto)
+
+
+@router.delete(
+    "/{id}",
+    response_model=APIResponse[bool],
+    status_code=status.HTTP_200_OK,
+    summary="Delete an existing user (Admin)",
+    description="Deletes an existing user. Access restricted to administrators. Version: v1.",
+)
+async def delete_user(
+    id: int = Path(..., title="The ID of the User to delete"),
+    use_case: DeleteUserUseCase = Depends(get_delete_user_use_case)
+) -> APIResponse[bool]:
+    return await use_case.execute(user_id=id)
