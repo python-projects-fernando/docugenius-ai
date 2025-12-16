@@ -6,6 +6,8 @@ from backend.application.repositories.document_field_repository import DocumentF
 from backend.application.repositories.document_type_repository import DocumentTypeRepository
 from backend.application.repositories.user_repository import UserRepository
 from backend.application.use_cases.document_field.create_document_field_use_case import CreateDocumentFieldUseCase
+from backend.application.use_cases.document_type.batch_create_document_types_use_case import \
+    BatchCreateDocumentTypesUseCase
 from backend.application.use_cases.document_type.create_document_type_use_case import CreateDocumentTypeUseCase
 from backend.application.use_cases.document_type.delete_document_type_use_case import DeleteDocumentTypeUseCase
 from backend.application.use_cases.document_type.get_document_type_by_id_use_case import GetDocumentTypeByIdUseCase
@@ -72,6 +74,11 @@ def get_create_document_type_use_case(
     repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
 ) -> CreateDocumentTypeUseCase:
     return CreateDocumentTypeUseCase(repository=repository)
+
+def get_batch_create_document_types_use_case(
+    create_single_use_case: Annotated[CreateDocumentTypeUseCase, Depends(get_create_document_type_use_case)]
+) -> BatchCreateDocumentTypesUseCase:
+    return BatchCreateDocumentTypesUseCase(create_single_use_case=create_single_use_case)
 
 def get_update_document_type_use_case(
     repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]

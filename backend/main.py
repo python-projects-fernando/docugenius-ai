@@ -17,20 +17,20 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(DocumentTypeModel.metadata.create_all)
 
-    async with async_sessionmaker_instance() as session:
-        result = await session.execute(text("SELECT COUNT(*) FROM document_types"))
-        count = result.scalar()
-
-        if count == 0:
-            print("Table 'document_types' is empty. Inserting initial records...")
-            session.add(
-                DocumentTypeModel(name="Service Contract", description="Standard template for service contracts."))
-            session.add(DocumentTypeModel(name="Commercial Proposal",
-                                          description="Template for commercial proposals sent to clients."))
-            await session.commit()
-            print("Initial records inserted.")
-        else:
-            print(f"Table 'document_types' already has {count} record(s). No initial records will be inserted.")
+    # async with async_sessionmaker_instance() as session:
+    #     result = await session.execute(text("SELECT COUNT(*) FROM document_types"))
+    #     count = result.scalar()
+    #
+    #     if count == 0:
+    #         print("Table 'document_types' is empty. Inserting initial records...")
+    #         session.add(
+    #             DocumentTypeModel(name="Service Contract", description="Standard template for service contracts."))
+    #         session.add(DocumentTypeModel(name="Commercial Proposal",
+    #                                       description="Template for commercial proposals sent to clients."))
+    #         await session.commit()
+    #         print("Initial records inserted.")
+    #     else:
+    #         print(f"Table 'document_types' already has {count} record(s). No initial records will be inserted.")
 
     print("Application started successfully!")
     yield
