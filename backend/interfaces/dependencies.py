@@ -1,6 +1,7 @@
 from typing import Annotated
 from fastapi import Depends
 
+from backend.application.ai_gateway.ai_gateway import AIGateway
 from backend.application.repositories.document_field_repository import DocumentFieldRepository
 from backend.application.repositories.document_type_repository import DocumentTypeRepository
 from backend.application.repositories.user_repository import UserRepository
@@ -10,6 +11,7 @@ from backend.application.use_cases.document_type.delete_document_type_use_case i
 from backend.application.use_cases.document_type.get_document_type_by_id_use_case import GetDocumentTypeByIdUseCase
 from backend.application.use_cases.document_type.get_document_type_by_name_use_case import GetDocumentTypeByNameUseCase
 from backend.application.use_cases.document_type.list_document_types_use_case import ListDocumentTypesUseCase
+from backend.application.use_cases.document_type.suggest_document_types_use_case import SuggestDocumentTypesUseCase
 from backend.application.use_cases.document_type.update_document_type_use_case import UpdateDocumentTypeUseCase
 from backend.application.use_cases.user.create_user_use_case import CreateUserUseCase
 from backend.application.use_cases.user.delete_user_use_case import DeleteUserUseCase
@@ -20,7 +22,13 @@ from backend.application.use_cases.user.list_users_use_case import ListUsersUseC
 from backend.application.use_cases.user.update_user_use_case import UpdateUserUseCase
 from backend.infrastructure.database.mysql_dependencies import get_mysql_document_type_repository, \
     get_mysql_user_repository, get_mysql_document_field_repository
+from backend.infrastructure.gateways.ai_config import AIConfiguration, get_ai_configuration
+from backend.infrastructure.gateways.hf_openai_ai_gateway import HuggingFaceOpenAIAIGateway
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # User
 def get_create_user_use_case(
@@ -98,6 +106,20 @@ def get_create_document_field_use_case(
 ) -> CreateDocumentFieldUseCase:
     return CreateDocumentFieldUseCase(document_field_repository=document_field_repo, document_type_repository=document_type_repo)
 
+# AI
+def get_hf_openai_ai_gateway() -> HuggingFaceOpenAIAIGateway:
+    hf_token = os.getenv("HF_API_TOKEN")
+    if not hf_token:
+        raise ValueError("HF_API_TOKEN not found in environment variables.")
+    base_url = os.getenv("HF_OPENAI_BASE_URL", "https://router.huggingface.co/v1")
+    return HuggingFaceOpenAIAIGateway(hf_token=hf_token, base_url=base_url)
 
+# def get_ai_gateway() -> AIGateway:
+#     impl = get_hf_openai_ai_gateway()
+#     return impl
 
+def get_create_document_types_use_case(
+    impl: Annotated[AIGateway, Depends(get_hf_openai_ai_gateway)],
+) -> SuggestDocumentTypesUseCase:
+    return SuggestDocumentTypesUseCase(ai_gateway=impl)
 

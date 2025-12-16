@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, status, Path
 from backend.application.dtos.document_type import CreateDocumentTypeRequest, DocumentTypeResponse, \
     UpdateDocumentTypeRequest, DeleteDocumentTypeResponse
+from backend.application.dtos.document_type_suggestion import GenerateDocumentTypesResponse, \
+    GenerateDocumentTypesRequest
 from backend.application.use_cases.document_type.create_document_type_use_case import CreateDocumentTypeUseCase
 from backend.application.use_cases.document_type.delete_document_type_use_case import DeleteDocumentTypeUseCase
+from backend.application.use_cases.document_type.suggest_document_types_use_case import SuggestDocumentTypesUseCase
 from backend.application.use_cases.document_type.update_document_type_use_case import UpdateDocumentTypeUseCase
 from backend.interfaces.dependencies import get_create_document_type_use_case, get_update_document_type_use_case, \
-    get_delete_document_type_use_case
+    get_delete_document_type_use_case, get_create_document_types_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-types", tags=["Document Types - Admin"])
@@ -52,3 +55,17 @@ async def delete_document_type(
     use_case: DeleteDocumentTypeUseCase = Depends(get_delete_document_type_use_case)
 ) -> APIResponse[DeleteDocumentTypeResponse]:
     return await use_case.execute(id=id)
+
+
+@router.post(
+    "/suggest-document-types",
+    response_model=APIResponse[GenerateDocumentTypesResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Suggest document types based on business description (Admin)",
+    description="Calls the AI to suggest common document types for a given business description. Access restricted to administrators. Version: v1.",
+)
+async def suggest_document_types(
+    request_dto: GenerateDocumentTypesRequest,
+    use_case: SuggestDocumentTypesUseCase = Depends(get_create_document_types_use_case)
+) -> APIResponse[GenerateDocumentTypesResponse]:
+    return await use_case.execute(request_dto=request_dto)

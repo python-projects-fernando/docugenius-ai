@@ -7,3 +7,4 @@ aiomysql
 bcrypt
 python-dotenv
 huggingface_hub
+openai==2.9.0
