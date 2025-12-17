@@ -8,6 +8,7 @@ from backend.application.repositories.user_repository import UserRepository
 from backend.application.use_cases.document_field.batch_create_document_fields_use_case import \
     BatchCreateDocumentFieldsUseCase
 from backend.application.use_cases.document_field.create_document_field_use_case import CreateDocumentFieldUseCase
+from backend.application.use_cases.document_field.delete_document_field_use_case import DeleteDocumentFieldUseCase
 from backend.application.use_cases.document_field.get_document_field_by_id_use_case import GetDocumentFieldByIdUseCase
 from backend.application.use_cases.document_field.list_document_fields_by_document_type_use_case import \
     ListDocumentFieldsByDocumentTypeUseCase
@@ -31,7 +32,6 @@ from backend.application.use_cases.user.list_users_use_case import ListUsersUseC
 from backend.application.use_cases.user.update_user_use_case import UpdateUserUseCase
 from backend.infrastructure.database.mysql_dependencies import get_mysql_document_type_repository, \
     get_mysql_user_repository, get_mysql_document_field_repository
-from backend.infrastructure.gateways.ai_config import AIConfiguration, get_ai_configuration
 from backend.infrastructure.gateways.hf_openai_ai_gateway import HuggingFaceOpenAIAIGateway
 
 import os
@@ -142,6 +142,11 @@ def get_list_document_fields_by_document_type_use_case(
     document_field_repo: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)]
 ) -> ListDocumentFieldsByDocumentTypeUseCase:
     return ListDocumentFieldsByDocumentTypeUseCase(document_type_repo=document_type_repo, document_field_repo=document_field_repo)
+
+def get_delete_document_field_use_case(
+    repository: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)]
+) -> DeleteDocumentFieldUseCase:
+    return DeleteDocumentFieldUseCase(repository=repository)
 
 # AI
 def get_hf_openai_ai_gateway() -> HuggingFaceOpenAIAIGateway:

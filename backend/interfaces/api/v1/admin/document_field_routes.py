@@ -8,6 +8,7 @@ from backend.application.dtos.document_field_suggestion import GenerateDocumentF
 from backend.application.use_cases.document_field.batch_create_document_fields_use_case import \
     BatchCreateDocumentFieldsUseCase
 from backend.application.use_cases.document_field.create_document_field_use_case import CreateDocumentFieldUseCase
+from backend.application.use_cases.document_field.delete_document_field_use_case import DeleteDocumentFieldUseCase
 from backend.application.use_cases.document_field.get_document_field_by_id_use_case import GetDocumentFieldByIdUseCase
 from backend.application.use_cases.document_field.list_document_fields_by_document_type_use_case import \
     ListDocumentFieldsByDocumentTypeUseCase
@@ -16,7 +17,7 @@ from backend.application.use_cases.document_field.update_document_field_use_case
 from backend.application.use_cases.document_type.suggest_document_types_use_case import SuggestDocumentTypesUseCase
 from backend.interfaces.dependencies import get_create_document_field_use_case, get_suggest_document_fields_use_case, \
     get_batch_create_document_fields_use_case, get_list_document_fields_by_document_type_use_case, \
-    get_get_document_field_by_id_use_case, get_update_document_field_use_case
+    get_get_document_field_by_id_use_case, get_update_document_field_use_case, get_delete_document_field_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-fields", tags=["Document Fields - Admin"])
@@ -102,3 +103,16 @@ async def update_document_field(
     use_case: UpdateDocumentFieldUseCase = Depends(get_update_document_field_use_case)
 ) -> APIResponse[DocumentFieldResponse]:
     return await use_case.execute(field_id=id, request_dto=request_dto)
+
+@router.delete(
+    "/{id}",
+    response_model=APIResponse[bool],
+    status_code=status.HTTP_200_OK,
+    summary="Delete a specific document field by ID (Admin)",
+    description="Deletes a single document field identified by its unique ID. Access restricted to administrators. Version: v1.",
+)
+async def delete_document_field(
+    id: int = Path(..., title="The ID of the DocumentField to delete"),
+    use_case: DeleteDocumentFieldUseCase = Depends(get_delete_document_field_use_case)
+) -> APIResponse[bool]:
+    return await use_case.execute(field_id=id)
