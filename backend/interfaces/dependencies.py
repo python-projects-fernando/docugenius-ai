@@ -12,6 +12,7 @@ from backend.application.use_cases.document_field.get_document_field_by_id_use_c
 from backend.application.use_cases.document_field.list_document_fields_by_document_type_use_case import \
     ListDocumentFieldsByDocumentTypeUseCase
 from backend.application.use_cases.document_field.suggest_document_fields_use_case import SuggestDocumentFieldsUseCase
+from backend.application.use_cases.document_field.update_document_field_use_case import UpdateDocumentFieldUseCase
 from backend.application.use_cases.document_type.batch_create_document_types_use_case import \
     BatchCreateDocumentTypesUseCase
 from backend.application.use_cases.document_type.create_document_type_use_case import CreateDocumentTypeUseCase
@@ -129,6 +130,12 @@ def get_get_document_field_by_id_use_case(
     repository: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)]
 ) -> GetDocumentFieldByIdUseCase:
     return GetDocumentFieldByIdUseCase(repository=repository)
+
+def get_update_document_field_use_case(
+    document_field_repo: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)],
+    document_type_repo: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
+) -> UpdateDocumentFieldUseCase:
+    return UpdateDocumentFieldUseCase(document_field_repo=document_field_repo, document_type_repo=document_type_repo)
 
 def get_list_document_fields_by_document_type_use_case(
     document_type_repo: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)],
