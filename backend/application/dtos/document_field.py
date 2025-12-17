@@ -34,3 +34,7 @@ class CreateDocumentFieldRequestForBatch(BaseModel):
 class BatchCreateDocumentFieldsRequest(BaseModel):
     document_type_id: int
     fields: List[CreateDocumentFieldRequestForBatch]
+
+
+class DocumentFieldListResponse(BaseModel):
+    items: List[DocumentFieldResponse] = Field(..., description="The list of DocumentField items.")
