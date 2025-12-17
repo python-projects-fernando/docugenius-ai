@@ -40,7 +40,7 @@ IMPORTANT: Respond ONLY with the structured JSON data, nothing else. Do not add 
   "fields": [
     {{
       "name": "field_identifier", // e.g., "Contracting Company", "Service Value", "Start Date". Use readable format with spaces and capitalization suitable for labels.
-      "type": "html_input_type", // e.g., "text", "email", "date", "checkbox", "textarea", "select", "radio", "password", "tel", "url", "search", "range", "color", "hidden", "file".
+      "type": "html_input_type", // Use ONE OF THE FOLLOWING EXACT VALUES: "text", "email", "integer", "decimal", "date", "checkbox", "textarea", "select", "radio", "password", "tel", "url", "search", "range", "color", "hidden", "file".
                                   // Use "textarea" for fields that will hold longer, multi-line text (e.g., descriptions, notes, terms, addresses with multiple lines).
                                   // Use "text" for shorter, single-line text (e.g., names, codes, simple identifiers).
                                   // For numbers: use "integer" for whole numbers (e.g., number of employees) and "decimal" for numbers with fractional parts (e.g., monetary values, percentages).

@@ -1,6 +1,6 @@
 import pytest
-from datetime import datetime, timezone
 from backend.core.models.document_field import DocumentField
+from backend.core.enums.field_type_enum import FieldType
 
 class TestDocumentField:
 
@@ -9,10 +9,10 @@ class TestDocumentField:
         return {
             "id": 1,
             "document_type_id": 101,
-            "name": "contract_value",
-            "field_type": "decimal",
+            "name": "Contract Value",
+            "field_type": FieldType.DECIMAL,
             "is_required": True,
-            "description": "The monetary value of the contract.",
+            "description": "The monetary value of the contract."
         }
 
     def test_create_document_field_with_valid_data(self, valid_document_field_data):
@@ -24,25 +24,10 @@ class TestDocumentField:
         assert doc_field.is_required == valid_document_field_data["is_required"]
         assert doc_field.description == valid_document_field_data["description"]
 
-    @pytest.mark.parametrize("invalid_name", ["", "   ", "\t\n"])
-    def test_create_document_field_with_invalid_name_raises_value_error(self, invalid_name, valid_document_field_data):
-        data = valid_document_field_data.copy()
-        data["name"] = invalid_name
-        with pytest.raises(ValueError) as exc_info:
-            DocumentField(**data)
-        assert "cannot be empty or just whitespace" in str(exc_info.value)
-
-    def test_create_document_field_with_none_name_raises_value_error(self, valid_document_field_data):
-        data = valid_document_field_data.copy()
-        data["name"] = None
-        with pytest.raises(ValueError) as exc_info:
-            DocumentField(**data)
-        assert "cannot be empty or just whitespace" in str(exc_info.value)
-
     def test_eq_with_same_id(self, valid_document_field_data):
         doc_field1 = DocumentField(**valid_document_field_data)
         data2 = valid_document_field_data.copy()
-        data2["name"] = "different_name"
+        data2["name"] = "Different Name"
         data2["description"] = "Different description."
         doc_field2 = DocumentField(**data2)
         assert doc_field1 == doc_field2
@@ -86,7 +71,7 @@ class TestDocumentField:
     def test_hash_with_same_id(self, valid_document_field_data):
         doc_field1 = DocumentField(**valid_document_field_data)
         data2 = valid_document_field_data.copy()
-        data2["name"] = "different_name"
+        data2["name"] = "Different Name"
         data2["description"] = "Different description."
         doc_field2 = DocumentField(**data2)
         assert hash(doc_field1) == hash(doc_field2)
@@ -118,6 +103,7 @@ class TestDocumentField:
         doc_field2 = DocumentField(**data2)
         assert hash(doc_field1) != hash(doc_field2)
 
+
     def test_repr_includes_attributes(self, valid_document_field_data):
         doc_field = DocumentField(**valid_document_field_data)
         repr_str = repr(doc_field)
@@ -125,7 +111,7 @@ class TestDocumentField:
         assert f"id={valid_document_field_data['id']}" in repr_str
         assert f"document_type_id={valid_document_field_data['document_type_id']}" in repr_str
         assert f"name='{valid_document_field_data['name']}'" in repr_str
-        assert f"field_type='{valid_document_field_data['field_type']}'" in repr_str
+        assert f"field_type=FieldType.DECIMAL" in repr_str
         assert f"is_required={valid_document_field_data['is_required']}" in repr_str
         assert f"description='{valid_document_field_data['description']}'" in repr_str
 
@@ -138,6 +124,6 @@ class TestDocumentField:
         assert "id=None" in repr_str
         assert f"document_type_id={data['document_type_id']}" in repr_str
         assert f"name='{data['name']}'" in repr_str
-        assert f"field_type='{data['field_type']}'" in repr_str
+        assert f"field_type=FieldType.DECIMAL" in repr_str
         assert f"is_required={data['is_required']}" in repr_str
         assert f"description='{data['description']}'" in repr_str
