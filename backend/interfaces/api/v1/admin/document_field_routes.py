@@ -1,11 +1,17 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, status
-from backend.application.dtos.document_field import CreateDocumentFieldRequest, DocumentFieldResponse
+from backend.application.dtos.document_field import CreateDocumentFieldRequest, DocumentFieldResponse, \
+    BatchCreateDocumentFieldsRequest
 from backend.application.dtos.document_field_suggestion import GenerateDocumentFieldsResponse, \
     GenerateDocumentFieldsRequest
+from backend.application.use_cases.document_field.batch_create_document_fields_use_case import \
+    BatchCreateDocumentFieldsUseCase
 from backend.application.use_cases.document_field.create_document_field_use_case import CreateDocumentFieldUseCase
 from backend.application.use_cases.document_field.suggest_document_fields_use_case import SuggestDocumentFieldsUseCase
 from backend.application.use_cases.document_type.suggest_document_types_use_case import SuggestDocumentTypesUseCase
-from backend.interfaces.dependencies import get_create_document_field_use_case, get_suggest_document_fields_use_case
+from backend.interfaces.dependencies import get_create_document_field_use_case, get_suggest_document_fields_use_case, \
+    get_batch_create_document_fields_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-fields", tags=["Document Fields - Admin"])
@@ -21,6 +27,20 @@ async def create_document_field(
     request_dto: CreateDocumentFieldRequest,
     use_case: CreateDocumentFieldUseCase = Depends(get_create_document_field_use_case)
 ) -> APIResponse[DocumentFieldResponse]:
+    return await use_case.execute(request_dto=request_dto)
+
+
+@router.post(
+    "/batch-create",
+    response_model=APIResponse[List[DocumentFieldResponse]],
+    status_code=status.HTTP_201_CREATED,
+    summary="Create multiple document fields in a batch (Admin)",
+    description="Creates multiple new document fields for a specific document type in a single request. Access restricted to administrators. Version: v1.",
+)
+async def batch_create_document_fields(
+    request_dto: BatchCreateDocumentFieldsRequest,
+    use_case: BatchCreateDocumentFieldsUseCase = Depends(get_batch_create_document_fields_use_case)
+) -> APIResponse[List[DocumentFieldResponse]]:
     return await use_case.execute(request_dto=request_dto)
 
 

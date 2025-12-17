@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
 from backend.core.enums.field_type_enum import FieldType
 
@@ -22,3 +22,15 @@ class DocumentFieldResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class CreateDocumentFieldRequestForBatch(BaseModel):
+    name: str
+    type: FieldType
+    required: bool
+    description: str
+
+
+class BatchCreateDocumentFieldsRequest(BaseModel):
+    document_type_id: int
+    fields: List[CreateDocumentFieldRequestForBatch]

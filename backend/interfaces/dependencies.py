@@ -5,6 +5,8 @@ from backend.application.ai_gateway.ai_gateway import AIGateway
 from backend.application.repositories.document_field_repository import DocumentFieldRepository
 from backend.application.repositories.document_type_repository import DocumentTypeRepository
 from backend.application.repositories.user_repository import UserRepository
+from backend.application.use_cases.document_field.batch_create_document_fields_use_case import \
+    BatchCreateDocumentFieldsUseCase
 from backend.application.use_cases.document_field.create_document_field_use_case import CreateDocumentFieldUseCase
 from backend.application.use_cases.document_field.suggest_document_fields_use_case import SuggestDocumentFieldsUseCase
 from backend.application.use_cases.document_type.batch_create_document_types_use_case import \
@@ -113,6 +115,13 @@ def get_create_document_field_use_case(
     document_type_repo: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
 ) -> CreateDocumentFieldUseCase:
     return CreateDocumentFieldUseCase(document_field_repository=document_field_repo, document_type_repository=document_type_repo)
+
+def get_batch_create_document_fields_use_case(
+    document_type_repo: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)],
+    document_field_repo: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)]
+) -> BatchCreateDocumentFieldsUseCase:
+    return BatchCreateDocumentFieldsUseCase(document_type_repo=document_type_repo, document_field_repo=document_field_repo)
+
 
 # AI
 def get_hf_openai_ai_gateway() -> HuggingFaceOpenAIAIGateway:
