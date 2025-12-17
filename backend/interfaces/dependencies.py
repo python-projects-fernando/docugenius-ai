@@ -8,6 +8,7 @@ from backend.application.repositories.user_repository import UserRepository
 from backend.application.use_cases.document_field.batch_create_document_fields_use_case import \
     BatchCreateDocumentFieldsUseCase
 from backend.application.use_cases.document_field.create_document_field_use_case import CreateDocumentFieldUseCase
+from backend.application.use_cases.document_field.get_document_field_by_id_use_case import GetDocumentFieldByIdUseCase
 from backend.application.use_cases.document_field.list_document_fields_by_document_type_use_case import \
     ListDocumentFieldsByDocumentTypeUseCase
 from backend.application.use_cases.document_field.suggest_document_fields_use_case import SuggestDocumentFieldsUseCase
@@ -124,6 +125,11 @@ def get_batch_create_document_fields_use_case(
 ) -> BatchCreateDocumentFieldsUseCase:
     return BatchCreateDocumentFieldsUseCase(document_type_repo=document_type_repo, document_field_repo=document_field_repo)
 
+def get_get_document_field_by_id_use_case(
+    repository: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)]
+) -> GetDocumentFieldByIdUseCase:
+    return GetDocumentFieldByIdUseCase(repository=repository)
+
 def get_list_document_fields_by_document_type_use_case(
     document_type_repo: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)],
     document_field_repo: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)]
@@ -137,10 +143,6 @@ def get_hf_openai_ai_gateway() -> HuggingFaceOpenAIAIGateway:
         raise ValueError("HF_API_TOKEN not found in environment variables.")
     base_url = os.getenv("HF_OPENAI_BASE_URL", "https://router.huggingface.co/v1")
     return HuggingFaceOpenAIAIGateway(hf_token=hf_token, base_url=base_url)
-
-# def get_ai_gateway() -> AIGateway:
-#     impl = get_hf_openai_ai_gateway()
-#     return impl
 
 def get_suggest_document_types_use_case(
     impl: Annotated[AIGateway, Depends(get_hf_openai_ai_gateway)],

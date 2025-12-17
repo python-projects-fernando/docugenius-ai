@@ -8,12 +8,14 @@ from backend.application.dtos.document_field_suggestion import GenerateDocumentF
 from backend.application.use_cases.document_field.batch_create_document_fields_use_case import \
     BatchCreateDocumentFieldsUseCase
 from backend.application.use_cases.document_field.create_document_field_use_case import CreateDocumentFieldUseCase
+from backend.application.use_cases.document_field.get_document_field_by_id_use_case import GetDocumentFieldByIdUseCase
 from backend.application.use_cases.document_field.list_document_fields_by_document_type_use_case import \
     ListDocumentFieldsByDocumentTypeUseCase
 from backend.application.use_cases.document_field.suggest_document_fields_use_case import SuggestDocumentFieldsUseCase
 from backend.application.use_cases.document_type.suggest_document_types_use_case import SuggestDocumentTypesUseCase
 from backend.interfaces.dependencies import get_create_document_field_use_case, get_suggest_document_fields_use_case, \
-    get_batch_create_document_fields_use_case, get_list_document_fields_by_document_type_use_case
+    get_batch_create_document_fields_use_case, get_list_document_fields_by_document_type_use_case, \
+    get_get_document_field_by_id_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-fields", tags=["Document Fields - Admin"])
@@ -58,6 +60,19 @@ async def suggest_document_fields(
     use_case: SuggestDocumentFieldsUseCase = Depends(get_suggest_document_fields_use_case)
 ) -> APIResponse[GenerateDocumentFieldsResponse]:
     return await use_case.execute(request_dto=request_dto)
+
+@router.get(
+    "/{id}",
+    response_model=APIResponse[DocumentFieldResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get a specific document field by ID (Admin)",
+    description="Retrieves the details of a single document field identified by its unique ID. Access restricted to administrators. Version: v1.",
+)
+async def get_document_field_by_id(
+    id: int = Path(..., title="The ID of the DocumentField to retrieve"),
+    use_case: GetDocumentFieldByIdUseCase = Depends(get_get_document_field_by_id_use_case)
+) -> APIResponse[DocumentFieldResponse]:
+    return await use_case.execute(field_id=id)
 
 
 @router.get(
