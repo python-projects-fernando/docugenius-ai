@@ -12,7 +12,8 @@ from backend.application.use_cases.document_type.delete_document_type_use_case i
 from backend.application.use_cases.document_type.suggest_document_types_use_case import SuggestDocumentTypesUseCase
 from backend.application.use_cases.document_type.update_document_type_use_case import UpdateDocumentTypeUseCase
 from backend.interfaces.dependencies import get_create_document_type_use_case, get_update_document_type_use_case, \
-    get_delete_document_type_use_case, get_create_document_types_use_case, get_batch_create_document_types_use_case
+    get_delete_document_type_use_case, get_batch_create_document_types_use_case, \
+    get_suggest_document_types_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-types", tags=["Document Types - Admin"])
@@ -76,7 +77,7 @@ async def delete_document_type(
 
 
 @router.post(
-    "/suggest-document-types",
+    "/suggest",
     response_model=APIResponse[GenerateDocumentTypesResponse],
     status_code=status.HTTP_200_OK,
     summary="Suggest document types based on business description (Admin)",
@@ -84,6 +85,6 @@ async def delete_document_type(
 )
 async def suggest_document_types(
     request_dto: GenerateDocumentTypesRequest,
-    use_case: SuggestDocumentTypesUseCase = Depends(get_create_document_types_use_case)
+    use_case: SuggestDocumentTypesUseCase = Depends(get_suggest_document_types_use_case)
 ) -> APIResponse[GenerateDocumentTypesResponse]:
     return await use_case.execute(request_dto=request_dto)

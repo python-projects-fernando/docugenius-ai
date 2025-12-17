@@ -6,6 +6,7 @@ from backend.application.repositories.document_field_repository import DocumentF
 from backend.application.repositories.document_type_repository import DocumentTypeRepository
 from backend.application.repositories.user_repository import UserRepository
 from backend.application.use_cases.document_field.create_document_field_use_case import CreateDocumentFieldUseCase
+from backend.application.use_cases.document_field.suggest_document_fields_use_case import SuggestDocumentFieldsUseCase
 from backend.application.use_cases.document_type.batch_create_document_types_use_case import \
     BatchCreateDocumentTypesUseCase
 from backend.application.use_cases.document_type.create_document_type_use_case import CreateDocumentTypeUseCase
@@ -125,8 +126,13 @@ def get_hf_openai_ai_gateway() -> HuggingFaceOpenAIAIGateway:
 #     impl = get_hf_openai_ai_gateway()
 #     return impl
 
-def get_create_document_types_use_case(
+def get_suggest_document_types_use_case(
     impl: Annotated[AIGateway, Depends(get_hf_openai_ai_gateway)],
 ) -> SuggestDocumentTypesUseCase:
     return SuggestDocumentTypesUseCase(ai_gateway=impl)
+
+def get_suggest_document_fields_use_case(
+    impl: Annotated[AIGateway, Depends(get_hf_openai_ai_gateway)]
+) -> SuggestDocumentFieldsUseCase:
+    return SuggestDocumentFieldsUseCase(ai_gateway=impl)
 
