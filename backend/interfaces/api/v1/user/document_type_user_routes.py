@@ -7,7 +7,7 @@ from backend.application.use_cases.document_type.list_document_types_use_case im
 from backend.core.enums.user_role_enum import UserRole
 from backend.core.models.user import User
 from backend.interfaces.dependencies import get_list_document_types_use_case, get_get_document_type_by_id_use_case, \
-    get_get_document_type_by_name_use_case, get_current_common_user, role_checker
+    get_get_document_type_by_name_use_case, role_checker
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-types", tags=["Document Types - User"])

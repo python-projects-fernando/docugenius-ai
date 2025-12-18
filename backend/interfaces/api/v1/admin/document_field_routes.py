@@ -22,7 +22,7 @@ from backend.core.models.user import User
 from backend.interfaces.dependencies import get_create_document_field_use_case, get_suggest_document_fields_use_case, \
     get_batch_create_document_fields_use_case, get_list_document_fields_by_document_type_use_case, \
     get_get_document_field_by_id_use_case, get_update_document_field_use_case, get_delete_document_field_use_case, \
-    get_get_field_types_use_case, get_current_admin, role_checker
+    get_get_field_types_use_case, role_checker
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-fields", tags=["Document Fields - Admin"])

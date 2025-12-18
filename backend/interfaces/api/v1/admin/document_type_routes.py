@@ -15,7 +15,7 @@ from backend.core.enums.user_role_enum import UserRole
 from backend.core.models.user import User
 from backend.interfaces.dependencies import get_create_document_type_use_case, get_update_document_type_use_case, \
     get_delete_document_type_use_case, get_batch_create_document_types_use_case, \
-    get_suggest_document_types_use_case, get_current_admin, role_checker
+    get_suggest_document_types_use_case, role_checker
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-types", tags=["Document Types - Admin"])

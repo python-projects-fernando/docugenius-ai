@@ -91,33 +91,6 @@ async def get_current_user(
 
     return user_entity
 
-async def get_current_admin(
-    current_user: CoreUser = Depends(get_current_user)
-) -> CoreUser:
-    forbidden_exception = HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="Access denied. Administrator privileges required.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    if current_user.role != UserRole.ADMIN:
-        raise forbidden_exception
-
-    return current_user
-
-async def get_current_common_user(
-    current_user: CoreUser = Depends(get_current_user)
-) -> CoreUser:
-    forbidden_exception = HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="Access denied. Common user privileges required.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    if current_user.role != UserRole.COMMON_USER:
-        raise forbidden_exception
-    return current_user
-
-# TESTS ----------------------------------------------------------------------------------------------------------------
 def role_checker(allowed_roles: List[UserRole]):
     async def check_user_role(current_user: CoreUser = Depends(get_current_user)):
         forbidden_exception = HTTPException(
@@ -131,8 +104,6 @@ def role_checker(allowed_roles: List[UserRole]):
 
         return current_user
     return check_user_role
-
-# END TESTS ------------------------------------------------------------------------------------------------------------
 
 def get_login_user_use_case(
     user_repo: Annotated[UserRepository, Depends(get_mysql_user_repository)]

@@ -15,7 +15,7 @@ from backend.core.enums.user_role_enum import UserRole
 from backend.core.models.user import User
 from backend.interfaces.dependencies import get_create_user_use_case, get_update_user_use_case, \
     get_delete_user_use_case, get_get_user_by_id_use_case, get_get_user_by_username_use_case, \
-    get_get_user_by_email_use_case, get_list_users_use_case, get_get_user_roles_use_case, get_current_admin, \
+    get_get_user_by_email_use_case, get_list_users_use_case, get_get_user_roles_use_case, \
     role_checker
 from backend.application.dtos.api_response import APIResponse
 
