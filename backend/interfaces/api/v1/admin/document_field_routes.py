@@ -17,10 +17,11 @@ from backend.application.use_cases.document_field.suggest_document_fields_use_ca
 from backend.application.use_cases.document_field.update_document_field_use_case import UpdateDocumentFieldUseCase
 from backend.application.use_cases.document_type.suggest_document_types_use_case import SuggestDocumentTypesUseCase
 from backend.application.use_cases.enum.get_field_types_use_case import GetFieldTypesUseCase
+from backend.core.models.user import User
 from backend.interfaces.dependencies import get_create_document_field_use_case, get_suggest_document_fields_use_case, \
     get_batch_create_document_fields_use_case, get_list_document_fields_by_document_type_use_case, \
     get_get_document_field_by_id_use_case, get_update_document_field_use_case, get_delete_document_field_use_case, \
-    get_get_field_types_use_case
+    get_get_field_types_use_case, get_current_admin
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-fields", tags=["Document Fields - Admin"])
@@ -34,6 +35,7 @@ router = APIRouter(prefix="/document-fields", tags=["Document Fields - Admin"])
 )
 async def create_document_field(
     request_dto: CreateDocumentFieldRequest,
+    current_user: User = Depends(get_current_admin),
     use_case: CreateDocumentFieldUseCase = Depends(get_create_document_field_use_case)
 ) -> APIResponse[DocumentFieldResponse]:
     return await use_case.execute(request_dto=request_dto)
@@ -48,6 +50,7 @@ async def create_document_field(
 )
 async def batch_create_document_fields(
     request_dto: BatchCreateDocumentFieldsRequest,
+    current_user: User = Depends(get_current_admin),
     use_case: BatchCreateDocumentFieldsUseCase = Depends(get_batch_create_document_fields_use_case)
 ) -> APIResponse[List[DocumentFieldResponse]]:
     return await use_case.execute(request_dto=request_dto)
@@ -62,6 +65,7 @@ async def batch_create_document_fields(
 )
 async def suggest_document_fields(
     request_dto: GenerateDocumentFieldsRequest,
+    current_user: User = Depends(get_current_admin),
     use_case: SuggestDocumentFieldsUseCase = Depends(get_suggest_document_fields_use_case)
 ) -> APIResponse[GenerateDocumentFieldsResponse]:
     return await use_case.execute(request_dto=request_dto)
@@ -75,6 +79,7 @@ async def suggest_document_fields(
 )
 async def get_document_field_by_id(
     id: int = Path(..., title="The ID of the DocumentField to retrieve"),
+    current_user: User = Depends(get_current_admin),
     use_case: GetDocumentFieldByIdUseCase = Depends(get_get_document_field_by_id_use_case)
 ) -> APIResponse[DocumentFieldResponse]:
     return await use_case.execute(field_id=id)
@@ -89,6 +94,7 @@ async def get_document_field_by_id(
 )
 async def list_document_fields_by_document_type(
     document_type_id: int = Path(..., title="The ID of the DocumentType to list fields for"),
+    current_user: User = Depends(get_current_admin),
     use_case: ListDocumentFieldsByDocumentTypeUseCase = Depends(get_list_document_fields_by_document_type_use_case)
 ) -> APIResponse[DocumentFieldListResponse]:
     return await use_case.execute(document_type_id=document_type_id)
@@ -103,6 +109,7 @@ async def list_document_fields_by_document_type(
 async def update_document_field(
     id: int = Path(..., title="The ID of the DocumentField to update"),
     request_dto: UpdateDocumentFieldRequest = ...,
+    current_user: User = Depends(get_current_admin),
     use_case: UpdateDocumentFieldUseCase = Depends(get_update_document_field_use_case)
 ) -> APIResponse[DocumentFieldResponse]:
     return await use_case.execute(field_id=id, request_dto=request_dto)
@@ -116,6 +123,7 @@ async def update_document_field(
 )
 async def delete_document_field(
     id: int = Path(..., title="The ID of the DocumentField to delete"),
+    current_user: User = Depends(get_current_admin),
     use_case: DeleteDocumentFieldUseCase = Depends(get_delete_document_field_use_case)
 ) -> APIResponse[bool]:
     return await use_case.execute(field_id=id)
@@ -128,6 +136,7 @@ async def delete_document_field(
     description="Returns a list of all valid field types (e.g., text, integer, decimal, textarea) that can be used for document fields. Access restricted to administrators. Version: v1.",
 )
 async def list_field_types(
+    current_user: User = Depends(get_current_admin),
     use_case: GetFieldTypesUseCase = Depends(get_get_field_types_use_case)
 ) -> APIResponse[EnumListResponse]:
     return await use_case.execute()

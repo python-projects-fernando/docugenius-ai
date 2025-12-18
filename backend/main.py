@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.security import HTTPBearer
 
 from backend.core.models.user import User
 from backend.infrastructure.database.mysql_dependencies import get_mysql_user_repository
@@ -10,6 +11,7 @@ from backend.interfaces.api.v1.admin.document_type_routes import router as docum
 from backend.interfaces.api.v1.user.document_type_user_routes import router as user_document_type_router
 from backend.interfaces.api.v1.admin.document_field_routes import router as admin_document_field_router
 from backend.interfaces.api.v1.admin.user_routes import router as user_router
+from backend.interfaces.api.v1.auth.auth_routes import router as auth_router
 import os
 from dotenv import load_dotenv
 import logging
@@ -76,7 +78,13 @@ async def lifespan(app: FastAPI):
     print("Shutting down application...")
 
 
-app = FastAPI(title="DocuGeniusAI API", lifespan=lifespan)
+security_scheme = HTTPBearer(
+    scheme_name="JWT",
+    description="JWT authorization header using the Bearer scheme. Example: 'Bearer YOUR_JWT_ACCESS_TOKEN'",
+    auto_error=True
+)
+
+app = FastAPI(title="DocuGeniusAI API", lifespan=lifespan, openapi_security=[{"JWT": []}])
 
 app.add_middleware(
     CORSMiddleware,
@@ -86,6 +94,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router, prefix="/api/v1")
 app.include_router(document_type_router, prefix="/api/v1/admin")
 app.include_router(user_document_type_router, prefix="/api/v1/user")
 app.include_router(admin_document_field_router, prefix="/api/v1/admin")

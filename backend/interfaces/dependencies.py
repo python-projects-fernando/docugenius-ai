@@ -1,10 +1,13 @@
-from typing import Annotated
-from fastapi import Depends
+from typing import Annotated, List
+from fastapi import Depends,HTTPException, status
+from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
+from jose import JWTError, jwt
 
 from backend.application.ai_gateway.ai_gateway import AIGateway
 from backend.application.repositories.document_field_repository import DocumentFieldRepository
 from backend.application.repositories.document_type_repository import DocumentTypeRepository
 from backend.application.repositories.user_repository import UserRepository
+from backend.application.use_cases.auth.login_user_use_case import LoginUserUseCase
 from backend.application.use_cases.document_field.batch_create_document_fields_use_case import \
     BatchCreateDocumentFieldsUseCase
 from backend.application.use_cases.document_field.create_document_field_use_case import CreateDocumentFieldUseCase
@@ -32,14 +35,93 @@ from backend.application.use_cases.user.get_user_by_id_use_case import GetUserBy
 from backend.application.use_cases.user.get_user_by_username_use_case import GetUserByUsernameUseCase
 from backend.application.use_cases.user.list_users_use_case import ListUsersUseCase
 from backend.application.use_cases.user.update_user_use_case import UpdateUserUseCase
+from backend.core.enums.user_role_enum import UserRole
 from backend.infrastructure.database.mysql_dependencies import get_mysql_document_type_repository, \
     get_mysql_user_repository, get_mysql_document_field_repository
 from backend.infrastructure.gateways.hf_openai_ai_gateway import HuggingFaceOpenAIAIGateway
+from backend.core.models.user import User as CoreUser
 
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Auth
+security_scheme = HTTPBearer(
+    scheme_name="JWT",
+    description="JWT authorization header using the Bearer scheme. Example: 'Bearer YOUR_JWT_ACCESS_TOKEN'",
+    auto_error=True
+)
+
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-super-secret-jwt-key-change-this-in-production")
+ALGORITHM = "HS256"
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
+    user_repo: UserRepository = Depends(get_mysql_user_repository)
+) -> CoreUser:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        token_type: str = payload.get("type")
+
+        if user_id is None or token_type != "access":
+            raise credentials_exception
+
+    except JWTError:
+        raise credentials_exception
+
+    user_entity = await user_repo.find_by_id(int(user_id))
+
+    if user_entity is None:
+        raise credentials_exception
+
+    if not user_entity.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Inactive user account",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return user_entity
+
+async def get_current_admin(
+    current_user: CoreUser = Depends(get_current_user)
+) -> CoreUser:
+    forbidden_exception = HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Access denied. Administrator privileges required.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    if current_user.role != UserRole.ADMIN:
+        raise forbidden_exception
+
+    return current_user
+
+async def get_current_common_user(
+    current_user: CoreUser = Depends(get_current_user)
+) -> CoreUser:
+    forbidden_exception = HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Access denied. Common user privileges required.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    if current_user.role != UserRole.COMMON_USER:
+        raise forbidden_exception
+    return current_user
+
+def get_login_user_use_case(
+    user_repo: Annotated[UserRepository, Depends(get_mysql_user_repository)]
+) -> LoginUserUseCase:
+    return LoginUserUseCase(user_repository=user_repo)
+
 
 # User
 def get_create_user_use_case(

@@ -11,9 +11,10 @@ from backend.application.use_cases.user.get_user_by_id_use_case import GetUserBy
 from backend.application.use_cases.user.get_user_by_username_use_case import GetUserByUsernameUseCase
 from backend.application.use_cases.user.list_users_use_case import ListUsersUseCase
 from backend.application.use_cases.user.update_user_use_case import UpdateUserUseCase
+from backend.core.models.user import User
 from backend.interfaces.dependencies import get_create_user_use_case, get_update_user_use_case, \
     get_delete_user_use_case, get_get_user_by_id_use_case, get_get_user_by_username_use_case, \
-    get_get_user_by_email_use_case, get_list_users_use_case, get_get_user_roles_use_case
+    get_get_user_by_email_use_case, get_list_users_use_case, get_get_user_roles_use_case, get_current_admin
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/users", tags=["Users - Admin"])
@@ -27,6 +28,7 @@ router = APIRouter(prefix="/users", tags=["Users - Admin"])
 )
 async def create_user(
     request_dto: CreateUserRequest,
+    current_user: User = Depends(get_current_admin),
     use_case: CreateUserUseCase = Depends(get_create_user_use_case)
 ) -> APIResponse[UserResponse]:
     return await use_case.execute(request_dto=request_dto)
@@ -42,6 +44,7 @@ async def create_user(
 async def update_user(
     id: int = Path(..., title="The ID of the User to update"),
     request_dto: UpdateUserRequest = ...,
+    current_user: User = Depends(get_current_admin),
     use_case: UpdateUserUseCase = Depends(get_update_user_use_case)
 ) -> APIResponse[UserResponse]:
     return await use_case.execute(user_id=id, request_dto=request_dto)
@@ -56,6 +59,7 @@ async def update_user(
 )
 async def delete_user(
     id: int = Path(..., title="The ID of the User to delete"),
+    current_user: User = Depends(get_current_admin),
     use_case: DeleteUserUseCase = Depends(get_delete_user_use_case)
 ) -> APIResponse[bool]:
     return await use_case.execute(user_id=id)
@@ -69,6 +73,7 @@ async def delete_user(
 )
 async def get_user_by_id(
     id: int = Path(..., title="The ID of the User to retrieve"),
+    current_user: User = Depends(get_current_admin),
     use_case: GetUserByIdUseCase = Depends(get_get_user_by_id_use_case)
 ) -> APIResponse[UserResponse]:
     return await use_case.execute(user_id=id)
@@ -82,6 +87,7 @@ async def get_user_by_id(
 )
 async def get_user_by_username(
     username: str = Query(..., title="The username of the User to retrieve"),
+    current_user: User = Depends(get_current_admin),
     use_case: GetUserByUsernameUseCase = Depends(get_get_user_by_username_use_case)
 ) -> APIResponse[UserResponse]:
     return await use_case.execute(username=username)
@@ -95,6 +101,7 @@ async def get_user_by_username(
 )
 async def get_user_by_email(
     email: str = Query(..., title="The email of the User to retrieve"),
+    current_user: User = Depends(get_current_admin),
     use_case: GetUserByEmailUseCase = Depends(get_get_user_by_email_use_case)
 ) -> APIResponse[UserResponse]:
     return await use_case.execute(email=email)
@@ -109,6 +116,7 @@ async def get_user_by_email(
 async def list_users(
     page: int = Query(default=1, ge=1, description="Page number (1-indexed)."),
     size: int = Query(default=10, ge=1, le=100, description="Number of items per page (max 100)."),
+    current_user: User = Depends(get_current_admin),
     use_case: ListUsersUseCase = Depends(get_list_users_use_case)
 ) -> APIResponse[UserListResponse]:
     pagination_params = PaginationParams(page=page, size=size)
@@ -122,6 +130,7 @@ async def list_users(
     description="Returns a list of all valid user roles (e.g., admin, common) that can be assigned to users. Access restricted to administrators. Version: v1.",
 )
 async def list_user_roles(
+    current_user: User = Depends(get_current_admin),
     use_case: GetUserRolesUseCase = Depends(get_get_user_roles_use_case)
 ) -> APIResponse[EnumListResponse]:
     return await use_case.execute()
