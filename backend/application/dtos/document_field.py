@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
-
 from backend.core.enums.field_type_enum import FieldType
 
 
@@ -37,15 +36,41 @@ class DocumentFieldResponse(BaseModel):
 
 
 class CreateDocumentFieldRequestForBatch(BaseModel):
-    name: str
-    type: FieldType
-    required: bool
-    description: str
+    name: str = Field(
+        ...,
+        description="The display name of the field (e.g., 'Contracting Company', 'Service Value', 'Start Date'). Used as a label in the form.",
+        min_length=1
+    )
+    type: FieldType = Field(
+        ...,
+        description="The type of the field, using the FieldType Enum (e.g., text, integer, decimal, textarea, select, radio, checkbox, date, email)."
+    )
+    required: bool = Field(
+        False,
+        description="Whether the field is mandatory (True) or optional (False). Defaults to False."
+    )
+    description: str = Field(
+        ...,
+        description="A brief description explaining the purpose or expected content of the field.",
+        min_length=1
+    )
+
+    def __post_init__(self):
+        self.name = self.name.strip()
+        self.description = self.description.strip()
 
 
 class BatchCreateDocumentFieldsRequest(BaseModel):
-    document_type_id: int
-    fields: List[CreateDocumentFieldRequestForBatch]
+    document_type_id: int = Field(
+        ...,
+        gt=0,
+        description="The ID of the DocumentType to which all the fields in this batch belong. Must be a positive integer."
+    )
+    fields: List[CreateDocumentFieldRequestForBatch] = Field(
+        ...,
+        min_length=1,
+        description="The list of fields to be created for the specified DocumentType. Must contain at least one field definition."
+    )
 
 
 class DocumentFieldListResponse(BaseModel):
