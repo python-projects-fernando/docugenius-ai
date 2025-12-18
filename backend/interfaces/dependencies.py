@@ -23,6 +23,8 @@ from backend.application.use_cases.document_type.get_document_type_by_name_use_c
 from backend.application.use_cases.document_type.list_document_types_use_case import ListDocumentTypesUseCase
 from backend.application.use_cases.document_type.suggest_document_types_use_case import SuggestDocumentTypesUseCase
 from backend.application.use_cases.document_type.update_document_type_use_case import UpdateDocumentTypeUseCase
+from backend.application.use_cases.enum.get_field_types_use_case import GetFieldTypesUseCase
+from backend.application.use_cases.enum.get_user_roles_use_case import GetUserRolesUseCase
 from backend.application.use_cases.user.create_user_use_case import CreateUserUseCase
 from backend.application.use_cases.user.delete_user_use_case import DeleteUserUseCase
 from backend.application.use_cases.user.get_user_by_email_use_case import GetUserByEmailUseCase
@@ -74,6 +76,9 @@ def get_list_users_use_case(
     repository: Annotated[UserRepository, Depends(get_mysql_user_repository)]
 ) -> ListUsersUseCase:
     return ListUsersUseCase(repository=repository)
+
+def get_get_user_roles_use_case() -> GetUserRolesUseCase:
+    return GetUserRolesUseCase()
 
 
 # Document Type
@@ -147,6 +152,9 @@ def get_delete_document_field_use_case(
     repository: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)]
 ) -> DeleteDocumentFieldUseCase:
     return DeleteDocumentFieldUseCase(repository=repository)
+
+def get_get_field_types_use_case() -> GetFieldTypesUseCase:
+    return GetFieldTypesUseCase()
 
 # AI
 def get_hf_openai_ai_gateway() -> HuggingFaceOpenAIAIGateway:

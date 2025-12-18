@@ -5,15 +5,17 @@ from backend.application.dtos.document_type import CreateDocumentTypeRequest, Do
     UpdateDocumentTypeRequest, DeleteDocumentTypeResponse
 from backend.application.dtos.document_type_suggestion import GenerateDocumentTypesResponse, \
     GenerateDocumentTypesRequest
+from backend.application.dtos.enum_dtos import EnumListResponse
 from backend.application.use_cases.document_type.batch_create_document_types_use_case import \
     BatchCreateDocumentTypesUseCase
 from backend.application.use_cases.document_type.create_document_type_use_case import CreateDocumentTypeUseCase
 from backend.application.use_cases.document_type.delete_document_type_use_case import DeleteDocumentTypeUseCase
 from backend.application.use_cases.document_type.suggest_document_types_use_case import SuggestDocumentTypesUseCase
 from backend.application.use_cases.document_type.update_document_type_use_case import UpdateDocumentTypeUseCase
+from backend.application.use_cases.enum.get_field_types_use_case import GetFieldTypesUseCase
 from backend.interfaces.dependencies import get_create_document_type_use_case, get_update_document_type_use_case, \
     get_delete_document_type_use_case, get_batch_create_document_types_use_case, \
-    get_suggest_document_types_use_case
+    get_suggest_document_types_use_case, get_get_field_types_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-types", tags=["Document Types - Admin"])
@@ -88,3 +90,4 @@ async def suggest_document_types(
     use_case: SuggestDocumentTypesUseCase = Depends(get_suggest_document_types_use_case)
 ) -> APIResponse[GenerateDocumentTypesResponse]:
     return await use_case.execute(request_dto=request_dto)
+

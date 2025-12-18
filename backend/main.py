@@ -1,8 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from backend.application.dtos.user import CreateUserRequest
-from backend.application.use_cases.user.create_user_use_case import CreateUserUseCase
 from backend.core.models.user import User
 from backend.infrastructure.database.mysql_dependencies import get_mysql_user_repository
 from backend.infrastructure.models.document_type_model import DocumentTypeModel

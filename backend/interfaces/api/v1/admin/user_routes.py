@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, status, Path, Query
+
+from backend.application.dtos.enum_dtos import EnumListResponse
 from backend.application.dtos.user import CreateUserRequest, UserResponse, UpdateUserRequest, UserListResponse
 from backend.application.dtos.pagination_params import PaginationParams
+from backend.application.use_cases.enum.get_user_roles_use_case import GetUserRolesUseCase
 from backend.application.use_cases.user.create_user_use_case import CreateUserUseCase
 from backend.application.use_cases.user.delete_user_use_case import DeleteUserUseCase
 from backend.application.use_cases.user.get_user_by_email_use_case import GetUserByEmailUseCase
@@ -10,7 +13,7 @@ from backend.application.use_cases.user.list_users_use_case import ListUsersUseC
 from backend.application.use_cases.user.update_user_use_case import UpdateUserUseCase
 from backend.interfaces.dependencies import get_create_user_use_case, get_update_user_use_case, \
     get_delete_user_use_case, get_get_user_by_id_use_case, get_get_user_by_username_use_case, \
-    get_get_user_by_email_use_case, get_list_users_use_case
+    get_get_user_by_email_use_case, get_list_users_use_case, get_get_user_roles_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/users", tags=["Users - Admin"])
@@ -110,3 +113,15 @@ async def list_users(
 ) -> APIResponse[UserListResponse]:
     pagination_params = PaginationParams(page=page, size=size)
     return await use_case.execute(pagination=pagination_params)
+
+@router.get(
+    "/user-roles",
+    response_model=APIResponse[EnumListResponse],
+    status_code=status.HTTP_200_OK,
+    summary="List available user roles (Admin)",
+    description="Returns a list of all valid user roles (e.g., admin, common) that can be assigned to users. Access restricted to administrators. Version: v1.",
+)
+async def list_user_roles(
+    use_case: GetUserRolesUseCase = Depends(get_get_user_roles_use_case)
+) -> APIResponse[EnumListResponse]:
+    return await use_case.execute()
