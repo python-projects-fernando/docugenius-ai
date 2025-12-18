@@ -11,10 +11,11 @@ from backend.application.use_cases.document_type.create_document_type_use_case i
 from backend.application.use_cases.document_type.delete_document_type_use_case import DeleteDocumentTypeUseCase
 from backend.application.use_cases.document_type.suggest_document_types_use_case import SuggestDocumentTypesUseCase
 from backend.application.use_cases.document_type.update_document_type_use_case import UpdateDocumentTypeUseCase
+from backend.core.enums.user_role_enum import UserRole
 from backend.core.models.user import User
 from backend.interfaces.dependencies import get_create_document_type_use_case, get_update_document_type_use_case, \
     get_delete_document_type_use_case, get_batch_create_document_types_use_case, \
-    get_suggest_document_types_use_case, get_current_admin
+    get_suggest_document_types_use_case, get_current_admin, role_checker
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-types", tags=["Document Types - Admin"])
@@ -29,7 +30,7 @@ router = APIRouter(prefix="/document-types", tags=["Document Types - Admin"])
 )
 async def create_document_type(
     request_dto: CreateDocumentTypeRequest,
-    current_user: User = Depends(get_current_admin),
+    current_user: User = Depends(role_checker([UserRole.ADMIN])),
     use_case: CreateDocumentTypeUseCase = Depends(get_create_document_type_use_case)
 ) -> APIResponse[DocumentTypeResponse]:
     return await use_case.execute(request_dto)
@@ -44,7 +45,7 @@ async def create_document_type(
 )
 async def batch_create_document_types(
     request_dtos: List[CreateDocumentTypeRequest],
-    current_user: User = Depends(get_current_admin),
+    current_user: User = Depends(role_checker([UserRole.ADMIN])),
     use_case: BatchCreateDocumentTypesUseCase = Depends(get_batch_create_document_types_use_case)
 ) -> APIResponse[List[DocumentTypeResponse]]:
     return await use_case.execute(request_dtos=request_dtos)
@@ -60,7 +61,7 @@ async def batch_create_document_types(
 async def update_document_type(
     id: int = Path(..., title="The ID of the DocumentType to update"),
     request_dto: UpdateDocumentTypeRequest = ...,
-    current_user: User = Depends(get_current_admin),
+    current_user: User = Depends(role_checker([UserRole.ADMIN])),
     use_case: UpdateDocumentTypeUseCase = Depends(get_update_document_type_use_case)
 ) -> APIResponse[DocumentTypeResponse]:
     return await use_case.execute(id=id, request_dto=request_dto)
@@ -75,7 +76,7 @@ async def update_document_type(
 )
 async def delete_document_type(
     id: int = Path(..., title="The ID of the DocumentType to delete"),
-    current_user: User = Depends(get_current_admin),
+    current_user: User = Depends(role_checker([UserRole.ADMIN])),
     use_case: DeleteDocumentTypeUseCase = Depends(get_delete_document_type_use_case)
 ) -> APIResponse[DeleteDocumentTypeResponse]:
     return await use_case.execute(id=id)
@@ -90,7 +91,7 @@ async def delete_document_type(
 )
 async def suggest_document_types(
     request_dto: GenerateDocumentTypesRequest,
-    current_user: User = Depends(get_current_admin),
+    current_user: User = Depends(role_checker([UserRole.ADMIN])),
     use_case: SuggestDocumentTypesUseCase = Depends(get_suggest_document_types_use_case)
 ) -> APIResponse[GenerateDocumentTypesResponse]:
     return await use_case.execute(request_dto=request_dto)

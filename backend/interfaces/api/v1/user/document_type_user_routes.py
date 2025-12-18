@@ -4,9 +4,10 @@ from backend.application.dtos.pagination_params import PaginationParams
 from backend.application.use_cases.document_type.get_document_type_by_id_use_case import GetDocumentTypeByIdUseCase
 from backend.application.use_cases.document_type.get_document_type_by_name_use_case import GetDocumentTypeByNameUseCase
 from backend.application.use_cases.document_type.list_document_types_use_case import ListDocumentTypesUseCase
+from backend.core.enums.user_role_enum import UserRole
 from backend.core.models.user import User
 from backend.interfaces.dependencies import get_list_document_types_use_case, get_get_document_type_by_id_use_case, \
-    get_get_document_type_by_name_use_case, get_current_common_user
+    get_get_document_type_by_name_use_case, get_current_common_user, role_checker
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-types", tags=["Document Types - User"])
@@ -21,7 +22,7 @@ router = APIRouter(prefix="/document-types", tags=["Document Types - User"])
 async def list_document_types(
     page: int = Query(default=1, ge=1, description="Page number (1-indexed)."),
     size: int = Query(default=10, ge=1, le=100, description="Number of items per page (max 100)."),
-    current_user: User = Depends(get_current_common_user),
+    current_user: User = Depends(role_checker([UserRole.COMMON_USER, UserRole.ADMIN])),
     use_case: ListDocumentTypesUseCase = Depends(get_list_document_types_use_case)
 ) -> APIResponse[DocumentTypeListResponse]:
     pagination_params = PaginationParams(page=page, size=size)
@@ -37,7 +38,7 @@ async def list_document_types(
 )
 async def get_document_type_by_id(
     id: int = Path(..., title="The ID of the DocumentType to retrieve"),
-    current_user: User = Depends(get_current_common_user),
+    current_user: User = Depends(role_checker([UserRole.COMMON_USER, UserRole.ADMIN])),
     use_case: GetDocumentTypeByIdUseCase = Depends(get_get_document_type_by_id_use_case)
 ) -> APIResponse[DocumentTypeResponse]:
     return await use_case.execute(document_type_id=id)
@@ -51,7 +52,7 @@ async def get_document_type_by_id(
 )
 async def get_document_type_by_name(
     name: str = Query(..., title="The name of the DocumentType to retrieve"),
-    current_user: User = Depends(get_current_common_user),
+    current_user: User = Depends(role_checker([UserRole.COMMON_USER, UserRole.ADMIN])),
     use_case: GetDocumentTypeByNameUseCase = Depends(get_get_document_type_by_name_use_case)
 ) -> APIResponse[DocumentTypeResponse]:
     return await use_case.execute(name=name)

@@ -117,6 +117,23 @@ async def get_current_common_user(
         raise forbidden_exception
     return current_user
 
+# TESTS ----------------------------------------------------------------------------------------------------------------
+def role_checker(allowed_roles: List[UserRole]):
+    async def check_user_role(current_user: CoreUser = Depends(get_current_user)):
+        forbidden_exception = HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Insufficient privileges.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+        if current_user.role not in allowed_roles:
+            raise forbidden_exception
+
+        return current_user
+    return check_user_role
+
+# END TESTS ------------------------------------------------------------------------------------------------------------
+
 def get_login_user_use_case(
     user_repo: Annotated[UserRepository, Depends(get_mysql_user_repository)]
 ) -> LoginUserUseCase:
