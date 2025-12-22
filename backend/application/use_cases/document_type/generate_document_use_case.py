@@ -1,12 +1,14 @@
 import json
 import logging
 import os
+from io import BytesIO
 from pathlib import Path
 from typing import Dict, Any
 from docx import Document
 from backend.application.repositories.document_type_repository import DocumentTypeRepository
 from backend.application.repositories.document_field_repository import DocumentFieldRepository
 from backend.application.ai_gateway.ai_gateway import AIGateway
+from backend.application.file_storage.file_storage import FileStorageGateway
 from backend.core.models.document_type import DocumentType as CoreDocumentType
 from backend.core.models.document_field import DocumentField as CoreDocumentField
 from backend.application.dtos.document_generation import GenerateDocumentRequest
@@ -16,12 +18,14 @@ from backend.application.prompts import GENERATE_DOCUMENT_CONTENT_PROMPT
 logger = logging.getLogger(__name__)
 
 class GenerateDocumentUseCase:
-    def __init__(self, document_type_repo: DocumentTypeRepository, document_field_repo: DocumentFieldRepository, ai_gateway: AIGateway):
+    def __init__(self, document_type_repo: DocumentTypeRepository, document_field_repo: DocumentFieldRepository,
+                 ai_gateway: AIGateway,file_storage: FileStorageGateway):
         self._document_type_repo = document_type_repo
         self._document_field_repo = document_field_repo
         self._ai_gateway = ai_gateway
         self._temp_docs_dir = Path("backend") / "temp_generated_docs"
         self._temp_docs_dir.mkdir(parents=True, exist_ok=True)
+        self._file_storage = file_storage
 
     async def execute(self, request_dto: GenerateDocumentRequest) -> APIResponse[dict]:
         try:
@@ -73,12 +77,22 @@ class GenerateDocumentUseCase:
 
             doc = Document()
             doc.add_paragraph(generated_content)
-            doc.save(full_file_path)
+
+            buffer = BytesIO()
+            doc.save(buffer)
+            buffer.seek(0)
+
+            # doc.save(full_file_path)
+
+            location_identifier = await self._file_storage.save_document(
+                content=buffer.getvalue(),
+                filename=unique_filename
+            )
 
             return APIResponse[dict](
                 success=True,
-                message="Document generated successfully by AI and saved as .docx.",
-                data={"filename": unique_filename},
+                message="Document generated successfully by AI and saved using the configured storage gateway.",
+                data={"location_identifier": location_identifier},
                 error_code=None,
                 errors=None
             )
