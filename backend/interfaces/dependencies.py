@@ -42,7 +42,7 @@ from backend.application.use_cases.document_type.generate_document_use_case impo
 from backend.core.enums.user_role_enum import UserRole
 from backend.infrastructure.database.mysql_dependencies import get_mysql_document_type_repository, \
     get_mysql_user_repository, get_mysql_document_field_repository, get_mysql_generated_document_repository
-from backend.infrastructure.file_storage.file_storage_dependencies import get_local_file_storage_gateway
+from backend.infrastructure.file_storage.file_storage_dependencies import get_file_storage_gateway
 from backend.infrastructure.gateways.hf_openai_ai_gateway import HuggingFaceOpenAIAIGateway
 from backend.core.models.user import User as CoreUser
 
@@ -258,7 +258,7 @@ def get_generate_document_use_case(
     doc_field_repo: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)],
     gen_doc_repo: Annotated[GeneratedDocumentRepository, Depends(get_mysql_generated_document_repository)],
     ai_gw: Annotated[AIGateway, Depends(get_hf_openai_ai_gateway)],
-    file_storage_gw: Annotated[FileStorageGateway, Depends(get_local_file_storage_gateway)]
+    file_storage_gw: Annotated[FileStorageGateway, Depends(get_file_storage_gateway)]
 ) -> GenerateDocumentUseCase:
     return GenerateDocumentUseCase(
         document_type_repo=doc_type_repo,
