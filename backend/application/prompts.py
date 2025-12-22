@@ -56,11 +56,10 @@ For fields that are expected to contain longer, multi-line text (like detailed d
 """
 
 #------------------------------------------------------------------------------------------------------------------------------
+document_type_name = "Service Contract"
+document_type_description = "Standard template for service contracts between parties for service provision."
 
-DOCUMENT_TYPE_NAME_EXAMPLE = "Service Contract"
-DOCUMENT_TYPE_DESCRIPTION_EXAMPLE = "Standard template for service contracts between parties for service provision."
-
-FILLED_FIELDS_EXAMPLE_JSON = '''
+filled_fields_json = '''
 {
   "contracting_company": "TechSolutions Inc.",
   "service_provider": "AnotherParty Corp.",
@@ -74,10 +73,10 @@ FILLED_FIELDS_EXAMPLE_JSON = '''
 
 GENERATE_DOCUMENT_CONTENT_PROMPT = """
 You are an expert in drafting professional documents.
-Generate the complete content for a document of type '{DOCUMENT_TYPE_NAME_EXAMPLE}' described as: '{DOCUMENT_TYPE_DESCRIPTION_EXAMPLE}'.
+Generate the complete content for a document of type '{document_type_name}' described as: '{document_type_description}'.
 Use the following field values provided by the user to populate the document:
 
-{FILLED_FIELDS_EXAMPLE_JSON}
+{filled_fields_json}
 
 Structure the document appropriately (e.g., title, sections, clauses, signature blocks), incorporating the provided data accurately and professionally.
 Ensure the generated text is coherent, follows a logical flow, and adheres to standard conventions for this type of document.

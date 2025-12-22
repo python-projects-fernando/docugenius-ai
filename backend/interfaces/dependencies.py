@@ -21,6 +21,7 @@ from backend.application.use_cases.document_type.batch_create_document_types_use
     BatchCreateDocumentTypesUseCase
 from backend.application.use_cases.document_type.create_document_type_use_case import CreateDocumentTypeUseCase
 from backend.application.use_cases.document_type.delete_document_type_use_case import DeleteDocumentTypeUseCase
+from backend.application.use_cases.document_type.generate_document_use_case import GenerateDocumentUseCase
 from backend.application.use_cases.document_type.get_document_type_by_id_use_case import GetDocumentTypeByIdUseCase
 from backend.application.use_cases.document_type.get_document_type_by_name_use_case import GetDocumentTypeByNameUseCase
 from backend.application.use_cases.document_type.list_document_types_use_case import ListDocumentTypesUseCase
@@ -35,6 +36,7 @@ from backend.application.use_cases.user.get_user_by_id_use_case import GetUserBy
 from backend.application.use_cases.user.get_user_by_username_use_case import GetUserByUsernameUseCase
 from backend.application.use_cases.user.list_users_use_case import ListUsersUseCase
 from backend.application.use_cases.user.update_user_use_case import UpdateUserUseCase
+from backend.application.use_cases.document_type.generate_document_use_case import GenerateDocumentUseCase
 from backend.core.enums.user_role_enum import UserRole
 from backend.infrastructure.database.mysql_dependencies import get_mysql_document_type_repository, \
     get_mysql_user_repository, get_mysql_document_field_repository
@@ -188,6 +190,8 @@ def get_get_document_type_by_name_use_case(
     return GetDocumentTypeByNameUseCase(repository=repository)
 
 
+
+
 # DOCUMENT FIELD
 def get_create_document_field_use_case(
     document_field_repo: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)],
@@ -243,4 +247,11 @@ def get_suggest_document_fields_use_case(
     impl: Annotated[AIGateway, Depends(get_hf_openai_ai_gateway)]
 ) -> SuggestDocumentFieldsUseCase:
     return SuggestDocumentFieldsUseCase(ai_gateway=impl)
+
+def get_generate_document_use_case(
+    doc_type_repo: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)],
+    doc_field_repo: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)],
+    impl: Annotated[AIGateway, Depends(get_hf_openai_ai_gateway)]
+) -> GenerateDocumentUseCase:
+    return GenerateDocumentUseCase(document_type_repo=doc_type_repo, document_field_repo=doc_field_repo, ai_gateway=impl)
 
