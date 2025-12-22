@@ -12,6 +12,7 @@ from backend.interfaces.api.v1.user.document_type_user_routes import router as u
 from backend.interfaces.api.v1.admin.document_field_routes import router as admin_document_field_router
 from backend.interfaces.api.v1.admin.user_routes import router as user_router
 from backend.interfaces.api.v1.auth.auth_routes import router as auth_router
+from backend.interfaces.api.v1.user.document_download_routes import router as document_download_router
 import os
 from dotenv import load_dotenv
 import logging
@@ -97,6 +98,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(document_type_router, prefix="/api/v1/admin")
 app.include_router(user_document_type_router, prefix="/api/v1/user")
+app.include_router(document_download_router, prefix="/api/v1/user")
 app.include_router(admin_document_field_router, prefix="/api/v1/admin")
 app.include_router(user_router, prefix="/api/v1/admin")
 

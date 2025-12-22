@@ -62,14 +62,14 @@ async def get_document_type_by_name(
 
 @router.post(
     "/generate-document",
-    response_model=APIResponse[str],
+    response_model=APIResponse[dict],
     status_code=status.HTTP_200_OK,
     summary="Generate a complete document (User/Admin)",
     description="Generates a complete document based on a selected document type and the filled field values provided by the user. Accessible by regular users and administrators. Version: v1.",
 )
 async def generate_document(
     request_dto: GenerateDocumentRequest,
-    current_user: User = Depends(role_checker([UserRole.COMMON_USER, UserRole.ADMIN])),
+    # current_user: User = Depends(role_checker([UserRole.COMMON_USER, UserRole.ADMIN])),
     use_case: GenerateDocumentUseCase = Depends(get_generate_document_use_case)
-) -> APIResponse[str]:
+) -> APIResponse[dict]:
     return await use_case.execute(request_dto=request_dto)

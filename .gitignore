@@ -54,6 +54,9 @@ fallback_test.db
 # drawio
 *.drawio.bkp
 
+backend/temp_generated_docs/
+*.docx
+
 # ==============================
 # Node.js / React (Frontend)
 # ==============================
