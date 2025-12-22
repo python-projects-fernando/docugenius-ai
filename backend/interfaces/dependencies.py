@@ -7,6 +7,7 @@ from backend.application.ai_gateway.ai_gateway import AIGateway
 from backend.application.file_storage.file_storage import FileStorageGateway
 from backend.application.repositories.document_field_repository import DocumentFieldRepository
 from backend.application.repositories.document_type_repository import DocumentTypeRepository
+from backend.application.repositories.generated_document_repository import GeneratedDocumentRepository
 from backend.application.repositories.user_repository import UserRepository
 from backend.application.use_cases.auth.login_user_use_case import LoginUserUseCase
 from backend.application.use_cases.document_field.batch_create_document_fields_use_case import \
@@ -40,7 +41,7 @@ from backend.application.use_cases.user.update_user_use_case import UpdateUserUs
 from backend.application.use_cases.document_type.generate_document_use_case import GenerateDocumentUseCase
 from backend.core.enums.user_role_enum import UserRole
 from backend.infrastructure.database.mysql_dependencies import get_mysql_document_type_repository, \
-    get_mysql_user_repository, get_mysql_document_field_repository
+    get_mysql_user_repository, get_mysql_document_field_repository, get_mysql_generated_document_repository
 from backend.infrastructure.file_storage.file_storage_dependencies import get_local_file_storage_gateway
 from backend.infrastructure.gateways.hf_openai_ai_gateway import HuggingFaceOpenAIAIGateway
 from backend.core.models.user import User as CoreUser
@@ -250,13 +251,19 @@ def get_suggest_document_fields_use_case(
 ) -> SuggestDocumentFieldsUseCase:
     return SuggestDocumentFieldsUseCase(ai_gateway=impl)
 
+
+
 def get_generate_document_use_case(
     doc_type_repo: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)],
     doc_field_repo: Annotated[DocumentFieldRepository, Depends(get_mysql_document_field_repository)],
-    impl: Annotated[AIGateway, Depends(get_hf_openai_ai_gateway)],
+    gen_doc_repo: Annotated[GeneratedDocumentRepository, Depends(get_mysql_generated_document_repository)],
+    ai_gw: Annotated[AIGateway, Depends(get_hf_openai_ai_gateway)],
     file_storage_gw: Annotated[FileStorageGateway, Depends(get_local_file_storage_gateway)]
-
 ) -> GenerateDocumentUseCase:
-    return GenerateDocumentUseCase(document_type_repo=doc_type_repo, document_field_repo=doc_field_repo, ai_gateway=impl,
-                                   file_storage=file_storage_gw)
-
+    return GenerateDocumentUseCase(
+        document_type_repo=doc_type_repo,
+        document_field_repo=doc_field_repo,
+        generated_document_repo=gen_doc_repo,
+        ai_gateway=ai_gw,
+        file_storage_gateway=file_storage_gw
+    )

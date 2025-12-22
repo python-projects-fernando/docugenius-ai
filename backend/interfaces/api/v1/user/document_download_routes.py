@@ -19,7 +19,7 @@ TEMP_DOCS_DIR = Path("backend") / "temp_generated_docs"
 )
 async def download_document(
     filename: str,
-    # current_user: User = Depends(role_checker([UserRole.COMMON_USER, UserRole.ADMIN]))
+    current_user: User = Depends(role_checker([UserRole.COMMON_USER, UserRole.ADMIN]))
 ):
     try:
         file_path = TEMP_DOCS_DIR.joinpath(filename).resolve()

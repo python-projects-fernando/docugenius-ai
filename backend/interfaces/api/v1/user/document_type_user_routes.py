@@ -69,7 +69,7 @@ async def get_document_type_by_name(
 )
 async def generate_document(
     request_dto: GenerateDocumentRequest,
-    # current_user: User = Depends(role_checker([UserRole.COMMON_USER, UserRole.ADMIN])),
+    current_user: User = Depends(role_checker([UserRole.COMMON_USER, UserRole.ADMIN])),
     use_case: GenerateDocumentUseCase = Depends(get_generate_document_use_case)
 ) -> APIResponse[dict]:
-    return await use_case.execute(request_dto=request_dto)
+    return await use_case.execute(request_dto=request_dto, current_user_id=current_user.id)
