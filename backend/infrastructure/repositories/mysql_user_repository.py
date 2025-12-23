@@ -136,7 +136,7 @@ class MySqlUserRepository(UserRepository):
         result = await self._db_session.execute(select(func.count(UserModel.id)))
         return result.scalar()
 
-    async def update(self, user: CoreUser) -> CoreUser:
+    async def update(self, user: CoreUser, updated_by_user_id: Optional[int] = None) -> CoreUser:
         if user.id is None:
             raise ValueError("User ID is required to update a user.")
 
@@ -156,10 +156,9 @@ class MySqlUserRepository(UserRepository):
         print(f"[DEBUG] MySqlUserRepository.update: Updating is_active to: {user.is_active}")  # Log do is_active
         existing_db_obj.role = user.role
         existing_db_obj.is_active = user.is_active
-        # if user.hashed_password:
-        #     existing_db_obj.password_hash = user.hashed_password.value
-        # existing_db_obj.role = user.role if user.role else existing_db_obj.role
-        # existing_db_obj.is_active = user.is_active
+
+        if updated_by_user_id is not None:
+            existing_db_obj.updated_by_user_id = updated_by_user_id
 
         await self._db_session.commit()
         await self._db_session.refresh(existing_db_obj)

@@ -49,7 +49,7 @@ async def update_user(
     current_user: User = Depends(role_checker([UserRole.ADMIN])),
     use_case: UpdateUserUseCase = Depends(get_update_user_use_case)
 ) -> APIResponse[UserResponse]:
-    return await use_case.execute(user_id=id, request_dto=request_dto)
+    return await use_case.execute(user_id=id, request_dto=request_dto, updated_by_user_id=current_user.id)
 
 
 @router.delete(

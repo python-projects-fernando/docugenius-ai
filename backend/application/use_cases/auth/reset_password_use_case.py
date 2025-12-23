@@ -69,7 +69,7 @@ class ResetPasswordUseCase:
             user_entity.hashed_password = new_hashed_password_vo
             user_entity.is_active = True
 
-            updated_user_entity = await self._user_repository.update(user_entity)
+            updated_user_entity = await self._user_repository.update(user_entity, updated_by_user_id=user_id)
             print(
                 f"[DEBUG] ResetPasswordUseCase: Updated entity returned - "
                 f"ID: {updated_user_entity.id if updated_user_entity else 'None'}, "

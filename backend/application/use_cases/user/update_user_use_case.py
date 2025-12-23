@@ -7,7 +7,7 @@ class UpdateUserUseCase:
     def __init__(self, repository: UserRepository):
         self._repository = repository
 
-    async def execute(self, user_id: int, request_dto: UpdateUserRequest) -> APIResponse[UserResponse]:
+    async def execute(self, user_id: int, request_dto: UpdateUserRequest, updated_by_user_id: int) -> APIResponse[UserResponse]:
         try:
             existing_user = await self._repository.find_by_id(user_id)
             if not existing_user:
@@ -56,7 +56,7 @@ class UpdateUserUseCase:
                 created_at=existing_user.created_at,
             )
 
-            saved_user_entity = await self._repository.update(user_id, updated_user_entity)
+            saved_user_entity = await self._repository.update(updated_user_entity, updated_by_user_id=updated_by_user_id)
 
             if saved_user_entity is None:
                  return APIResponse[UserResponse](

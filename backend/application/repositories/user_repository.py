@@ -24,7 +24,7 @@ class UserRepository(Protocol):
     async def count_all(self) -> int:
         ...
 
-    async def update(self, user: User) -> Optional[User]:
+    async def update(self, user: User, updated_by_user_id: Optional[int] = None) -> Optional[User]:
         ...
 
     async def delete(self, id: int) -> bool:
