@@ -10,6 +10,7 @@ from backend.application.repositories.document_field_repository import DocumentF
 from backend.application.repositories.document_type_repository import DocumentTypeRepository
 from backend.application.repositories.generated_document_repository import GeneratedDocumentRepository
 from backend.application.repositories.user_repository import UserRepository
+from backend.application.use_cases.auth.forgot_password_use_case import ForgotPasswordUseCase
 from backend.application.use_cases.auth.login_user_use_case import LoginUserUseCase
 from backend.application.use_cases.auth.reset_password_use_case import ResetPasswordUseCase
 from backend.application.use_cases.document_field.batch_create_document_fields_use_case import \
@@ -132,6 +133,14 @@ def get_create_user_use_case(
         email_gateway=email_gateway,
         redis_client=redis_client
     )
+
+def get_forgot_password_use_case(
+    user_repo: UserRepository = Depends(get_mysql_user_repository),
+    email_gw: EmailGateway = Depends(get_email_gateway),
+    redis_client: redis.Redis = Depends(get_redis_client)
+) -> ForgotPasswordUseCase:
+    return ForgotPasswordUseCase(user_repository=user_repo, email_gateway=email_gw, redis_client=redis_client)
+
 
 def get_reset_password_use_case(
     user_repo: UserRepository = Depends(get_mysql_user_repository),
