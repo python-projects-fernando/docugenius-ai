@@ -6,7 +6,7 @@ from backend.core.enums.user_role_enum import UserRole
 class CreateUserRequest(BaseModel):
     username: str = Field(..., description="The unique username for the new user.", min_length=1, max_length=80)
     email: EmailStr = Field(..., description="The email address for the new user.")
-    password: str = Field(..., description="The plain text password for the new user.", min_length=8)
+    # password: str = Field(..., description="The plain text password for the new user.", min_length=8)
     role: Optional[str] = Field("common", description="The role of the new user as a string (e.g., 'admin', 'common'). Will be converted to UserRole enum internally.")
 
     @field_validator('role')

@@ -4,12 +4,14 @@ from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 
 from backend.application.ai_gateway.ai_gateway import AIGateway
+from backend.application.email.email import EmailGateway
 from backend.application.file_storage.file_storage import FileStorageGateway
 from backend.application.repositories.document_field_repository import DocumentFieldRepository
 from backend.application.repositories.document_type_repository import DocumentTypeRepository
 from backend.application.repositories.generated_document_repository import GeneratedDocumentRepository
 from backend.application.repositories.user_repository import UserRepository
 from backend.application.use_cases.auth.login_user_use_case import LoginUserUseCase
+from backend.application.use_cases.auth.reset_password_use_case import ResetPasswordUseCase
 from backend.application.use_cases.document_field.batch_create_document_fields_use_case import \
     BatchCreateDocumentFieldsUseCase
 from backend.application.use_cases.document_field.create_document_field_use_case import CreateDocumentFieldUseCase
@@ -45,6 +47,9 @@ from backend.infrastructure.database.mysql_dependencies import get_mysql_documen
 from backend.infrastructure.file_storage.file_storage_dependencies import get_file_storage_gateway
 from backend.infrastructure.gateways.hf_openai_ai_gateway import HuggingFaceOpenAIAIGateway
 from backend.core.models.user import User as CoreUser
+from backend.infrastructure.redis.redis_dependencies import get_redis_client
+from backend.infrastructure.email.email_dependencies import get_email_gateway
+import redis.asyncio as redis
 
 import os
 from dotenv import load_dotenv
@@ -118,9 +123,21 @@ def get_login_user_use_case(
 
 # User
 def get_create_user_use_case(
-    repository: Annotated[UserRepository, Depends(get_mysql_user_repository)]
+    user_repo: Annotated[UserRepository, Depends(get_mysql_user_repository)],
+    email_gateway: Annotated[EmailGateway, Depends(get_email_gateway)],
+    redis_client: Annotated[redis.Redis, Depends(get_redis_client)]
 ) -> CreateUserUseCase:
-    return CreateUserUseCase(repository=repository)
+    return CreateUserUseCase(
+        repository=user_repo,
+        email_gateway=email_gateway,
+        redis_client=redis_client
+    )
+
+def get_reset_password_use_case(
+    user_repo: UserRepository = Depends(get_mysql_user_repository),
+    redis_client: redis.Redis = Depends(get_redis_client)
+) -> ResetPasswordUseCase:
+    return ResetPasswordUseCase(user_repository=user_repo, redis_client=redis_client)
 
 def get_update_user_use_case(
     repository: Annotated[UserRepository, Depends(get_mysql_user_repository)]
@@ -250,8 +267,6 @@ def get_suggest_document_fields_use_case(
     impl: Annotated[AIGateway, Depends(get_hf_openai_ai_gateway)]
 ) -> SuggestDocumentFieldsUseCase:
     return SuggestDocumentFieldsUseCase(ai_gateway=impl)
-
-
 
 def get_generate_document_use_case(
     doc_type_repo: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)],

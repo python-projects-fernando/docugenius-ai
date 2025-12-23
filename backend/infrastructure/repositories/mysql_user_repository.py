@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import delete, update, func
 from backend.application.repositories.user_repository import UserRepository
+from backend.core.enums.user_role_enum import UserRole
 from backend.core.models.user import User as CoreUser
 from backend.infrastructure.models.user_model import UserModel
 from backend.core.value_objects.hashed_password import HashedPassword
@@ -134,26 +135,52 @@ class MySqlUserRepository(UserRepository):
         result = await self._db_session.execute(select(func.count(UserModel.id)))
         return result.scalar()
 
-    async def update(self, id: int, user: CoreUser) -> Optional[CoreUser]:
-        stmt = (
-            update(UserModel).
-            where(UserModel.id == id).
-            values(
-                username=user.username,
-                email=user.email,
-                password_hash=user.hashed_password.value,
-                role=user.role,
-                is_active=user.is_active
-            )
-        )
-        result = await self._db_session.execute(stmt)
+    async def update(self, user: CoreUser) -> CoreUser:
+        if user.id is None:
+            raise ValueError("User ID is required to update a user.")
 
-        if result.rowcount == 0:
-            await self._db_session.commit()
+        existing_db_obj = await self._db_session.get(UserModel, user.id)
+        if not existing_db_obj:
             return None
 
+        existing_db_obj.username = user.username
+        existing_db_obj.email = user.email
+        print(
+            f"[DEBUG] MySqlUserRepository.update: user.hashed_password is not None: {user.hashed_password is not None}")  # Log da condição
+        if user.hashed_password:
+            print(
+                f"[DEBUG] MySqlUserRepository.update: Updating password hash to: {user.hashed_password.value[:10]}...")  # Log do hash a ser salvo
+            existing_db_obj.password_hash = user.hashed_password.value
+        print(f"[DEBUG] MySqlUserRepository.update: Updating role to: {user.role}")  # Log do role
+        print(f"[DEBUG] MySqlUserRepository.update: Updating is_active to: {user.is_active}")  # Log do is_active
+        existing_db_obj.role = user.role
+        existing_db_obj.is_active = user.is_active
+        # if user.hashed_password:
+        #     existing_db_obj.password_hash = user.hashed_password.value
+        # existing_db_obj.role = user.role if user.role else existing_db_obj.role
+        # existing_db_obj.is_active = user.is_active
+
         await self._db_session.commit()
-        return await self.find_by_id(id)
+        await self._db_session.refresh(existing_db_obj)
+        print(
+            f"[DEBUG] MySqlUserRepository.update: After refresh - "
+            f"DB password hash: {existing_db_obj.password_hash[:10]}..., "
+            f"DB role: {existing_db_obj.role}, DB is_active: {existing_db_obj.is_active}")
+
+        updated_core_user = CoreUser(
+            id=existing_db_obj.id,
+            username=existing_db_obj.username,
+            email=existing_db_obj.email,
+            hashed_password=HashedPassword(value=existing_db_obj.password_hash),
+            role=existing_db_obj.role,
+            is_active=existing_db_obj.is_active,
+            created_at=existing_db_obj.created_at,
+            updated_at=existing_db_obj.updated_at
+        )
+        return updated_core_user
+
+
+
 
     async def delete(self, id: int) -> bool:
         stmt = delete(UserModel).where(UserModel.id == id)
