@@ -34,6 +34,16 @@ The project is built with a focus on **asynchronous performance**, **type safety
 
 ---
 
+## Architecture & Deployment
+
+### Backend Architecture
+
+This diagram illustrates the high-level structure of the DocuGeniusAI backend, showing the relationship between API interfaces, application logic, core domain, infrastructure components, and external services.
+
+![DocuGeniusAI Backend Architecture](docs/diagrams/architecture/backend-architecture-diagram.png) <!-- Caminho relativo à raiz do repo -->
+
+---
+
 ## 👤 Maintained By
 
 This project is developed and maintained by **Fernando Antunes de Magalhães Desenvolvimento de Software Ltda.**
@@ -44,7 +54,6 @@ This project is developed and maintained by **Fernando Antunes de Magalhães Des
 
 ✉️ [contact@fmbyteshiftsoftware.com](mailto:contact@fmbyteshiftsoftware.com)
 
-🌐 [fmbyteshiftsoftware.com](https://fmbyteshiftsoftware.com)
+🌐 [fmbyteshiftsoftware.com](https://fmbyteshiftsoftware.com  )
 
 🏢 CNPJ: 62.145.022/0001-05 (Brazil)
-
