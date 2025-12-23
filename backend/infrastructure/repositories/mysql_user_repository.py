@@ -12,7 +12,7 @@ class MySqlUserRepository(UserRepository):
     def __init__(self, db_session: AsyncSession):
         self._db_session = db_session
 
-    async def save(self, user: CoreUser) -> CoreUser:
+    async def save(self, user: CoreUser, created_by_user_id: int = None) -> CoreUser:
         infra_user = UserModel(
             id=user.id,
             username=user.username,
@@ -20,6 +20,7 @@ class MySqlUserRepository(UserRepository):
             password_hash=user.hashed_password.value,
             role=user.role,
             is_active=user.is_active,
+            created_by_user_id=created_by_user_id
         )
 
         if user.id is not None:

@@ -2,6 +2,7 @@ import bcrypt
 import secrets
 import string
 import logging
+import os
 from backend.application.repositories.user_repository import UserRepository
 from backend.core.models.user import User as CoreUser
 from backend.core.value_objects.hashed_password import HashedPassword
@@ -17,8 +18,9 @@ class CreateUserUseCase:
         self._repository = repository
         self._email_gateway = email_gateway
         self._redis_client = redis_client
+        self._base_url = os.getenv("BASE_URL", "http://localhost:8000")
 
-    async def execute(self, request_dto: CreateUserRequest) -> APIResponse[UserResponse]:
+    async def execute(self, request_dto: CreateUserRequest, created_by_user_id: int) -> APIResponse[UserResponse]:
         try:
             existing_user_by_username = await self._repository.find_by_username(request_dto.username)
             if existing_user_by_username:
@@ -58,7 +60,7 @@ class CreateUserUseCase:
                 is_active=False
             )
 
-            saved_user_entity = await self._repository.save(new_user_entity)
+            saved_user_entity = await self._repository.save(new_user_entity, created_by_user_id=created_by_user_id)
 
             reset_token = secrets.token_urlsafe(32)
             redis_key = f"reset_token:{reset_token}"
@@ -67,8 +69,7 @@ class CreateUserUseCase:
 
             await self._redis_client.setex(redis_key, token_ttl_seconds, user_id_str)
 
-            base_url = "http://localhost:8000"
-            reset_link = f"{base_url}/api/v1/auth/reset-password?token={reset_token}"
+            reset_link = f"{self._base_url}/api/v1/auth/reset-password?token={reset_token}"
 
             email_subject = "Set Your Password for DocuGenius-AI"
             email_body = f"""

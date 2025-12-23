@@ -16,6 +16,7 @@ class User:
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     created_by_user_id: Optional[int] = None
+    updated_by_user_id: Optional[int] = None
 
     def __post_init__(self):
         if not self.username or not self.username.strip():
@@ -64,4 +65,5 @@ class User:
     def __repr__(self):
         return (f"User(id={self.id}, username='{self.username}', email='{self.email}', role={self.role}, "
                 f"is_active={self.is_active}, created_at={self.created_at}, updated_at={self.updated_at}, "
-                f"created_by_user_id={self.created_by_user_id})")
+                f"created_by_user_id={self.created_by_user_id},"
+                f"updated_by_user_id={self.updated_by_user_id})")

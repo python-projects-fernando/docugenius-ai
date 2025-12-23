@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum as SQLEnum, ForeignKey
-from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from backend.infrastructure.models.base import Base
 from backend.core.enums.user_role_enum import UserRole
@@ -16,8 +15,10 @@ class UserModel(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     created_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    updated_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     def __repr__(self) -> str:
         return (f"<UserModel(id={self.id}, username='{self.username}', email='{self.email}', role={self.role}, "
                 f"is_active={self.is_active}, created_at={self.created_at}, "
-                f"updated_at={self.updated_at}, created_by_user_id={self.created_by_user_id})>")
+                f"updated_at={self.updated_at}, created_by_user_id={self.created_by_user_id}, "
+                f"updated_by_user_id={self.updated_by_user_id})>")

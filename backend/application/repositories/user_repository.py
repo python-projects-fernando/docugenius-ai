@@ -3,7 +3,7 @@ from backend.core.models.user import User
 
 
 class UserRepository(Protocol):
-    async def save(self, user: User) -> User:
+    async def save(self, user: User, created_by_user_id: int = None) -> User:
         ...
 
     async def find_by_id(self, id: int) -> Optional[User]:

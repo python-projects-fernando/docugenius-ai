@@ -33,7 +33,7 @@ async def create_user(
     current_user: User = Depends(role_checker([UserRole.ADMIN])),
     use_case: CreateUserUseCase = Depends(get_create_user_use_case)
 ) -> APIResponse[UserResponse]:
-    return await use_case.execute(request_dto=request_dto)
+    return await use_case.execute(request_dto=request_dto, created_by_user_id=current_user.id)
 
 
 @router.put(
