@@ -48,10 +48,6 @@ This diagram illustrates the high-level structure of the DocuGeniusAI backend, s
 
 ---
 
-Okay, entendi. Vamos refazer a seção `Try It Locally` do README, em **inglês**, incluindo a instrução de copiar o `docker-compose.example.yml` para `docker-compose.development.yml` e preencher as variáveis de ambiente com os valores corretos.
-
----
-
 ## Try It Locally (Docker)
 
 To run DocuGeniusAI locally using Docker, follow the steps below.
