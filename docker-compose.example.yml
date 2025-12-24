@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: docugenius_ai_db
+    environment:
+      MYSQL_ROOT_PASSWORD: your_root_password_here
+      MYSQL_DATABASE: docugenius_ai
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_user_password_here
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "mysql -h 127.0.0.1 -u app_user -p$$MYSQL_PASSWORD -e 'SELECT 1'"
+      ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    container_name: docugenius_ai_redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.development
+    container_name: docugenius_ai_backend
+    ports:
+      - "8000:8000"
+    environment:
+      INITIAL_ADMIN_PASSWORD: change_me
+      JWT_SECRET_KEY: change_me
+      JWT_REFRESH_SECRET_KEY: change_me
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
+
+      DATABASE_URL: mysql+aiomysql://app_user:app_user_password_here@db:3306/docugenius_ai
+
+      HF_API_TOKEN: your_huggingface_token_here
+      HF_OPENAI_BASE_URL: https://router.huggingface.co/v1
+
+      AWS_ACCESS_KEY_ID: your_aws_access_key_id
+      AWS_SECRET_ACCESS_KEY: your_aws_secret_access_key
+      AWS_S3_BUCKET_NAME: your_s3_bucket_name
+      AWS_S3_REGION: us-east-1
+      STORAGE_BACKEND: S3
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD:
+      REDIS_DB: 0
+
+      SMTP_SERVER: smtp.gmail.com
+      SMTP_PORT: 587
+      EMAIL_ADDRESS: your_email@example.com
+      EMAIL_PASSWORD: your_email_password
+
+      BASE_URL: http://localhost:8000
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+volumes:
+  mysql_data:
