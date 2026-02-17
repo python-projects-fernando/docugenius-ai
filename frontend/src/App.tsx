@@ -1,10 +1,12 @@
 // src/App.tsx
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'; // Adicione Navigate se ainda não estiver importado
 import Header from './components/Header';
-import Footer from './components/Footer'; // Importe o componente Footer
+import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute'; // Importe o componente ProtectedRoute
 import Login from './pages/Login';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import ManageDocumentTypes from './pages/admin/ManageDocumentTypes';
 import type { User } from './types/auth';
 
 // Componente da Página Inicial (mantendo seu código atual, MAS SEM O HEADER e SEM O FOOTER)
@@ -137,8 +139,17 @@ const App: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             {/* Rota para a página de login - PASSA A FUNÇÃO handleLoginSuccess */}
             <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
-            {/* Rota para o dashboard do admin */}
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            {/* Rotas protegidas para admin */}
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute allowedRoles={['admin']} currentUser={currentUser}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/document-types" element={
+              <ProtectedRoute allowedRoles={['admin']} currentUser={currentUser}>
+                <ManageDocumentTypes />
+              </ProtectedRoute>
+            } />
             {/* Rota curinga para páginas não encontradas (opcional) */}
             <Route path="*" element={<div>Page Not Found</div>} />
           </Routes>
