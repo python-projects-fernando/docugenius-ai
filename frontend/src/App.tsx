@@ -2,16 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Header from './components/Header';
-import Login from './pages/Login'; // Importe o componente Login
+import Footer from './components/Footer'; // Importe o componente Footer
+import Login from './pages/Login';
 import AdminDashboard from './pages/admin/AdminDashboard';
-import type { User } from './types/auth'; // Importe o tipo User
+import type { User } from './types/auth';
 
-// Componente da Página Inicial (mantendo seu código atual, MAS SEM O HEADER)
+// Componente da Página Inicial (mantendo seu código atual, MAS SEM O HEADER e SEM O FOOTER)
 const HomePage = () => {
   // REMOVA TODO O CONTEÚDO DO HEADER AQUI
-  // O Header agora é um componente separado e é gerenciado pelo App.tsx
+  // REMOVA TODO O CONTEÚDO DO FOOTER AQUI
+  // O Header e Footer agora são componentes separados e são gerenciados pelo App.tsx
   return (
-    // O restante do conteúdo da HomePage permanece o mesmo, SEM O HEADER
+    // O restante do conteúdo da HomePage permanece o mesmo, SEM O HEADER e SEM O FOOTER
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* REMOVA ESTE BLOCO DE HEADER */}
       {/* <header className="bg-white border-b border-gray-200 shadow-sm">
@@ -19,7 +21,7 @@ const HomePage = () => {
       </header> */}
       {/* FIM DO BLOCO HEADER A SER REMOVIDO */}
 
-      {/* Mantenha o MAIN e FOOTER */}
+      {/* Mantenha o MAIN */}
       <main className="flex-grow flex items-center py-16">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center">
@@ -81,17 +83,12 @@ const HomePage = () => {
         </div>
       </main>
 
-      {/* Mantenha o FOOTER aqui também */}
-      <footer className="bg-gray-100 text-gray-600 py-8 border-t border-gray-200">
-        <div className="container mx-auto px-4 text-center">
-          <p>&copy; {new Date().getFullYear()} DocuGeniusAI. All rights reserved.</p>
-        </div>
-      </footer>
+      {/* NÃO INCLUA O FOOTER AQUI NO HomePage */}
     </div>
   );
 };
 
-// Componente App principal com Router e Rotas
+// Componente App principal com Router, Header, Routes e Footer
 const App: React.FC = () => {
   // Estado para armazenar o usuário logado
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -130,18 +127,25 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      {/* Renderize o Header no topo, fora das rotas, passando o estado e a função de logout */}
-      <Header currentUser={currentUser} onLogout={handleLogout} />
-      <Routes>
-        {/* Rota para a página inicial */}
-        <Route path="/" element={<HomePage />} />
-        {/* Rota para a página de login - PASSA A FUNÇÃO handleLoginSuccess */}
-        <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
-        {/* Rota para o dashboard do admin */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        {/* Rota curinga para páginas não encontradas (opcional) */}
-        <Route path="*" element={<div>Page Not Found</div>} />
-      </Routes>
+      <div className="flex flex-col min-h-screen">
+        {/* Renderize o Header no topo */}
+        <Header currentUser={currentUser} onLogout={handleLogout} />
+        {/* O conteúdo principal das rotas */}
+        <div className="flex-grow">
+          <Routes>
+            {/* Rota para a página inicial */}
+            <Route path="/" element={<HomePage />} />
+            {/* Rota para a página de login - PASSA A FUNÇÃO handleLoginSuccess */}
+            <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+            {/* Rota para o dashboard do admin */}
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            {/* Rota curinga para páginas não encontradas (opcional) */}
+            <Route path="*" element={<div>Page Not Found</div>} />
+          </Routes>
+        </div>
+        {/* Renderize o Footer na parte inferior */}
+        <Footer />
+      </div>
     </Router>
   );
 };
