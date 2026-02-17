@@ -1,35 +1,25 @@
 // src/App.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Login from './pages/Login';
-import AdminDashboard from './pages/admin/AdminDashboard'; // Importe o componente AdminDashboard
+import Header from './components/Header';
+import Login from './pages/Login'; // Importe o componente Login
+import AdminDashboard from './pages/admin/AdminDashboard';
+import type { User } from './types/auth'; // Importe o tipo User
 
-// Componente da Página Inicial (mantendo seu código atual)
+// Componente da Página Inicial (mantendo seu código atual, MAS SEM O HEADER)
 const HomePage = () => {
+  // REMOVA TODO O CONTEÚDO DO HEADER AQUI
+  // O Header agora é um componente separado e é gerenciado pelo App.tsx
   return (
+    // O restante do conteúdo da HomePage permanece o mesmo, SEM O HEADER
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">DG</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900">DocuGeniusAI</span>
-          </div>
-          <nav className="hidden md:flex space-x-8">
-            {/* Adicione links aqui se necessário */}
-          </nav>
-          <div className="flex items-center space-x-3">
-            {/* Substitua o botão "Sign In" por um Link para /login */}
-            <Link to="/login">
-              <button className="hidden md:inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-800 rounded-lg hover:bg-gray-50 font-medium transition-colors">
-                Sign In
-              </button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* REMOVA ESTE BLOCO DE HEADER */}
+      {/* <header className="bg-white border-b border-gray-200 shadow-sm">
+        ...
+      </header> */}
+      {/* FIM DO BLOCO HEADER A SER REMOVIDO */}
 
+      {/* Mantenha o MAIN e FOOTER */}
       <main className="flex-grow flex items-center py-16">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center">
@@ -91,6 +81,7 @@ const HomePage = () => {
         </div>
       </main>
 
+      {/* Mantenha o FOOTER aqui também */}
       <footer className="bg-gray-100 text-gray-600 py-8 border-t border-gray-200">
         <div className="container mx-auto px-4 text-center">
           <p>&copy; {new Date().getFullYear()} DocuGeniusAI. All rights reserved.</p>
@@ -102,13 +93,50 @@ const HomePage = () => {
 
 // Componente App principal com Router e Rotas
 const App: React.FC = () => {
+  // Estado para armazenar o usuário logado
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  // useEffect para carregar o estado do usuário do localStorage ao montar o componente
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsedUser: User = JSON.parse(storedUser);
+        setCurrentUser(parsedUser);
+      } catch (error) {
+        console.error('Erro ao parsear dados do usuário do localStorage:', error);
+        // Opcional: Limpar localStorage se estiver corrompido
+        localStorage.removeItem('user');
+        localStorage.removeItem('accessToken'); // Limpar token também se o user estiver corrompido
+      }
+    }
+  }, []); // O array de dependências vazio [] garante que este efeito rode apenas uma vez após a montagem inicial
+
+  // Função para lidar com o logout
+  const handleLogout = () => {
+    console.log('Logout acionado no App.tsx');
+    // Limpar o estado do usuário
+    setCurrentUser(null);
+    // Limpar os dados do localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('accessToken');
+  };
+
+  // Função para lidar com o sucesso do login (chamada pelo componente Login.tsx)
+  const handleLoginSuccess = (user: User) => {
+    console.log('Login bem-sucedido detectado no App.tsx');
+    setCurrentUser(user); // Atualiza o estado local do App com o novo usuário
+  };
+
   return (
     <Router>
+      {/* Renderize o Header no topo, fora das rotas, passando o estado e a função de logout */}
+      <Header currentUser={currentUser} onLogout={handleLogout} />
       <Routes>
         {/* Rota para a página inicial */}
         <Route path="/" element={<HomePage />} />
-        {/* Rota para a página de login */}
-        <Route path="/login" element={<Login />} />
+        {/* Rota para a página de login - PASSA A FUNÇÃO handleLoginSuccess */}
+        <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
         {/* Rota para o dashboard do admin */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         {/* Rota curinga para páginas não encontradas (opcional) */}

@@ -4,7 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
 import type { LoginRequestDTO, LoginResponseDTO, User, UserRole } from '../types/auth';
 
-const Login: React.FC = () => {
+// Adiciona uma prop para receber a função de atualização do usuário
+interface LoginProps {
+  onLoginSuccess: (user: User) => void;
+}
+
+const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +24,7 @@ const Login: React.FC = () => {
     }
 
     try {
+      console.log('Sending data:', { identifier, password });
 
       const requestBody: LoginRequestDTO = {
         identifier, // Nome correto esperado pelo backend
@@ -33,12 +39,15 @@ const Login: React.FC = () => {
         body: JSON.stringify(requestBody),
       });
 
-      const  LoginResponseDTO = await response.json(); // Tipa a resposta
+      console.log('Response received:', response.status);
 
-      if (response.ok && LoginResponseDTO.success) { // Checa se a resposta foi bem-sucedida e se data.success é true
+      const data: LoginResponseDTO = await response.json(); // Tipa a resposta com o nome correto da variável
+      console.log('Response ', data);
+
+      if (response.ok && data.success) { // Checa se a resposta foi bem-sucedida e se data.success é true
         // Extrai o papel (role) do usuário da resposta usando o DTO
-        const userRole: UserRole = LoginResponseDTO.data.user.role;
-        const userDataFromResponse = LoginResponseDTO.data.user;
+        const userRole: UserRole = data.data.user.role;
+        const userDataFromResponse = data.data.user;
 
         // Opcional: Converter a resposta do backend para o tipo User do frontend
         // Isso é útil se os campos forem ligeiramente diferentes entre backend e frontend.
@@ -51,17 +60,21 @@ const Login: React.FC = () => {
 
         // Armazenar dados do usuário no localStorage (opcional, mas comum)
         localStorage.setItem('user', JSON.stringify(frontendUser));
-        localStorage.setItem('accessToken', LoginResponseDTO.data.access_token); // Armazene o token se for usar
+        localStorage.setItem('accessToken', data.data.access_token); // Armazene o token se for usar
+
+        // Chama a função de callback passada do App.tsx para atualizar o estado lá
+        onLoginSuccess(frontendUser);
 
         // Verifica o papel do usuário e redireciona
         if (userRole === 'admin') {
+          alert('Welcome, Administrator!');
           navigate('/admin/dashboard'); // Redireciona para o dashboard do admin
         } else if (userRole === 'common') {
-          // Opcional: redirecionar para um dashboard comum ou para a home
+          alert('Welcome, User!');
           navigate('/'); // Exemplo: redireciona para a home
         } else {
           // Tratar outros papéis se necessário
-          // Redirecionar para uma página padrão ou perguntar ao usuário
+          alert(`Welcome, ${userDataFromResponse.username}! Role: ${userRole}`);
           navigate('/'); // Exemplo: redireciona para a home
         }
 
