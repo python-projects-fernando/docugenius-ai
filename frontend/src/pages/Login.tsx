@@ -1,3 +1,4 @@
+// src/pages/Login.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
@@ -18,10 +19,9 @@ const Login: React.FC = () => {
     }
 
     try {
-      console.log('Sending data:', { identifier, password });
 
       const requestBody: LoginRequestDTO = {
-        identifier,
+        identifier, // Nome correto esperado pelo backend
         password,
       };
 
@@ -33,42 +33,50 @@ const Login: React.FC = () => {
         body: JSON.stringify(requestBody),
       });
 
-      console.log('Response received:', response.status);
+      const  LoginResponseDTO = await response.json(); // Tipa a resposta
 
-      const data: LoginResponseDTO = await response.json();
-      console.log('Response data:', data);
+      if (response.ok && LoginResponseDTO.success) { // Checa se a resposta foi bem-sucedida e se data.success é true
+        // Extrai o papel (role) do usuário da resposta usando o DTO
+        const userRole: UserRole = LoginResponseDTO.data.user.role;
+        const userDataFromResponse = LoginResponseDTO.data.user;
 
-      if (response.ok && data.success) {
-        const userRole: UserRole = data.data.user.role;
-        const userDataFromResponse = data.data.user;
-
-        if (userRole === 'admin') {
-          alert('Welcome, Administrator!');
-        } else if (userRole === 'common') {
-          alert('Welcome, User!');
-        } else {
-          alert(`Welcome, ${userDataFromResponse.username}! Role: ${userRole}`);
-        }
-
+        // Opcional: Converter a resposta do backend para o tipo User do frontend
+        // Isso é útil se os campos forem ligeiramente diferentes entre backend e frontend.
         const frontendUser: User = {
-          id: userDataFromResponse.id.toString(),
+          id: userDataFromResponse.id.toString(), // Converte number para string se necessário
           username: userDataFromResponse.username,
           email: userDataFromResponse.email,
           role: userDataFromResponse.role,
         };
 
-        navigate('/');
-      } else {
-        let errorMessage = data.message || `Error ${response.status}: ${response.statusText}`;
+        // Armazenar dados do usuário no localStorage (opcional, mas comum)
+        localStorage.setItem('user', JSON.stringify(frontendUser));
+        localStorage.setItem('accessToken', LoginResponseDTO.data.access_token); // Armazene o token se for usar
 
-        if (response.status === 422) {
-          if (Array.isArray(data.errors) && data.errors.length > 0) {
-            errorMessage = `Validation Error: ${data.errors.map(e => e.msg).join(', ')}`;
-          } else {
-            errorMessage = 'Validation Error: Please check the provided data.';
-          }
+        // Verifica o papel do usuário e redireciona
+        if (userRole === 'admin') {
+          navigate('/admin/dashboard'); // Redireciona para o dashboard do admin
+        } else if (userRole === 'common') {
+          // Opcional: redirecionar para um dashboard comum ou para a home
+          navigate('/'); // Exemplo: redireciona para a home
+        } else {
+          // Tratar outros papéis se necessário
+          // Redirecionar para uma página padrão ou perguntar ao usuário
+          navigate('/'); // Exemplo: redireciona para a home
         }
 
+      } else {
+        // Tenta obter a mensagem de erro da resposta
+        let errorMessage = data.message || `Error ${response.status}: ${response.statusText}`;
+        // Ajuste aqui se a estrutura de erro for diferente
+        if (response.status === 422) {
+          // Exemplo: se a API retornar detalhes de erro em 'errors'
+          if (Array.isArray(data.errors) && data.errors.length > 0) {
+             errorMessage = `Validation Error: ${data.errors.map(e => e.msg).join(', ')}`;
+          } else {
+             errorMessage = 'Validation Error: Please check the provided data.'; // Mensagem genérica
+          }
+        }
         setError(errorMessage);
       }
     } catch (err) {

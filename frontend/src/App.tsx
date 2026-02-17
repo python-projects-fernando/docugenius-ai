@@ -1,7 +1,10 @@
+// src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Login from './pages/Login';
+import AdminDashboard from './pages/admin/AdminDashboard'; // Importe o componente AdminDashboard
 
+// Componente da Página Inicial (mantendo seu código atual)
 const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -14,8 +17,10 @@ const HomePage = () => {
             <span className="text-xl font-bold text-gray-900">DocuGeniusAI</span>
           </div>
           <nav className="hidden md:flex space-x-8">
+            {/* Adicione links aqui se necessário */}
           </nav>
           <div className="flex items-center space-x-3">
+            {/* Substitua o botão "Sign In" por um Link para /login */}
             <Link to="/login">
               <button className="hidden md:inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-800 rounded-lg hover:bg-gray-50 font-medium transition-colors">
                 Sign In
@@ -95,12 +100,18 @@ const HomePage = () => {
   );
 };
 
+// Componente App principal com Router e Rotas
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        {/* Rota para a página inicial */}
         <Route path="/" element={<HomePage />} />
+        {/* Rota para a página de login */}
         <Route path="/login" element={<Login />} />
+        {/* Rota para o dashboard do admin */}
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        {/* Rota curinga para páginas não encontradas (opcional) */}
         <Route path="*" element={<div>Page Not Found</div>} />
       </Routes>
     </Router>
