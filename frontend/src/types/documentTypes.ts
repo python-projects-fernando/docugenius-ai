@@ -1,3 +1,5 @@
+// src/types/documentTypes.ts
+
 // Representa um único tipo de documento
 export interface DocumentType {
   id: number;
@@ -18,29 +20,39 @@ export interface PaginationData<T> {
 export interface ListDocumentTypesResponse {
   success: boolean;
   message: string;
-  data: PaginationData<DocumentType>; // Usando generics para reutilizar PaginationData
+   PaginationData<DocumentType>; // Usando generics para reutilizar PaginationData
   error_code: string | null;
   errors: string[] | null;
 }
 
-// --- Tipos para outras operações (futuras) ---
-// Exemplo para criar/atualizar:
+// --- Tipos para outras operações ---
+
+// Exemplo para criar:
 export interface CreateDocumentTypeRequest {
   name: string;
   description: string;
 }
 
+// Exemplo para atualizar (campos opcionais):
 export interface UpdateDocumentTypeRequest extends Partial<CreateDocumentTypeRequest> {
   // Pode incluir campos específicos para atualização, se necessário
-  // Por exemplo, se a API exigir o ID no body:
-  // id: number;
+  // id: number; // Exemplo: se a API exigir o ID no body da requisição PUT/PATCH
 }
 
 // Exemplo para resposta de criação/atualização:
 export interface SingleDocumentTypeResponse {
   success: boolean;
   message: string;
-  data: DocumentType;
+   DocumentType;
+  error_code: string | null;
+  errors: string[] | null;
+}
+
+// Exemplo para resposta de deleção:
+export interface DeleteDocumentTypeResponse {
+  success: boolean;
+  message: string;
+   null;
   error_code: string | null;
   errors: string[] | null;
 }

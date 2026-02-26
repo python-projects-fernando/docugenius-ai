@@ -1,12 +1,13 @@
 // src/App.tsx
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'; // Adicione Navigate se ainda não estiver importado
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import ProtectedRoute from './components/ProtectedRoute'; // Importe o componente ProtectedRoute
+import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageDocumentTypes from './pages/admin/ManageDocumentTypes';
+import CreateDocumentType from './pages/admin/CreateDocumentType'; // Importe o novo componente
 import type { User } from './types/auth';
 
 // Componente da Página Inicial (mantendo seu código atual, MAS SEM O HEADER e SEM O FOOTER)
@@ -148,6 +149,12 @@ const App: React.FC = () => {
             <Route path="/admin/document-types" element={
               <ProtectedRoute allowedRoles={['admin']} currentUser={currentUser}>
                 <ManageDocumentTypes />
+              </ProtectedRoute>
+            } />
+            {/* Nova rota protegida para criar tipo de documento */}
+            <Route path="/admin/document-types/new" element={
+              <ProtectedRoute allowedRoles={['admin']} currentUser={currentUser}>
+                <CreateDocumentType />
               </ProtectedRoute>
             } />
             {/* Rota curinga para páginas não encontradas (opcional) */}
