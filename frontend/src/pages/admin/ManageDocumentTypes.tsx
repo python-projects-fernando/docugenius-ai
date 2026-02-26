@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../../config/api';
-// Importe os tipos do novo arquivo
-import type { DocumentType, ListDocumentTypesResponse } from '../../types/documentTypes';
+import type { DocumentType, ListDocumentTypesResponse, DeleteDocumentTypeResponse } from '../../types/documentTypes';
 
 const ManageDocumentTypes: React.FC = () => {
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
@@ -14,48 +13,92 @@ const ManageDocumentTypes: React.FC = () => {
   const page = 1;
   const size = 100;
 
-  useEffect(() => {
-    const fetchDocumentTypes = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  // Função para buscar os tipos de documento
+  const fetchDocumentTypes = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        // Lê o token de acesso do localStorage
-        const accessToken = localStorage.getItem('accessToken');
-        if (!accessToken) {
-          throw new Error('Access token not found in localStorage.');
-        }
-
-        const response = await fetch(`${API_BASE_URL}/user/document-types/?page=${page}&size=${size}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data:  ListDocumentTypesResponse = await response.json();
-
-        if (data.success) {
-          setDocumentTypes(data.data.items);
-        } else {
-          // Se a API retornar success: false, tenta pegar a mensagem de erro
-          throw new Error(data.message || 'Failed to fetch document types');
-        }
-      } catch (err) {
-        console.error('Erro ao buscar tipos de documento:', err);
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
-      } finally {
-        setLoading(false);
+      // Lê o token de acesso do localStorage
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+        throw new Error('Access token not found in localStorage.');
       }
-    };
 
+      const response = await fetch(`${API_BASE_URL}/user/document-types/?page=${page}&size=${size}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data:  ListDocumentTypesResponse = await response.json();
+
+      if (data.success) {
+        setDocumentTypes(data.data.items);
+      } else {
+        // Se a API retornar success: false, tenta pegar a mensagem de erro
+        throw new Error(data.message || 'Failed to fetch document types');
+      }
+    } catch (err) {
+      console.error('Erro ao buscar tipos de documento:', err);
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Função para deletar um tipo de documento
+  const deleteDocumentType = async (id: number) => {
+    if (!window.confirm(`Are you sure you want to delete the document type with ID ${id}?`)) {
+      return; // Sai da função se o usuário cancelar
+    }
+
+    try {
+      // Lê o token de acesso do localStorage
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+        throw new Error('Access token not found in localStorage.');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/admin/document-types/${id}`, { // Note o ID na URL
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data:  DeleteDocumentTypeResponse = await response.json();
+
+      if (data.success) {
+        console.log('Deletion response:', data); // Log para ver a resposta real
+        alert(data.message); // Mostra a mensagem de sucesso da API
+        // Atualiza a lista removendo o item deletado
+        setDocumentTypes(prevTypes => prevTypes.filter(type => type.id !== id));
+      } else {
+        // Se a API retornar success: false, tenta pegar a mensagem de erro
+        throw new Error(data.message || 'Failed to delete document type');
+      }
+    } catch (err) {
+      console.error('Erro ao deletar tipo de documento:', err);
+      alert(err instanceof Error ? err.message : 'An unknown error occurred during deletion.');
+    }
+  };
+
+  // Busca os dados ao montar o componente
+  useEffect(() => {
     fetchDocumentTypes();
-  }, [page, size]);
+  }, [page, size]); // Dependências: refaz a busca se page ou size mudar
 
   if (loading) {
     return (
@@ -138,7 +181,10 @@ const ManageDocumentTypes: React.FC = () => {
                       <Link to={`/admin/document-types/${type.id}/edit`} className="text-indigo-600 hover:text-indigo-900 mr-4">
                         Edit
                       </Link>
-                      <button className="text-red-600 hover:text-red-900">
+                      <button
+                        onClick={() => deleteDocumentType(type.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
                         Delete
                       </button>
                     </td>

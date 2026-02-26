@@ -48,11 +48,13 @@ export interface SingleDocumentTypeResponse {
   errors: string[] | null;
 }
 
-// Exemplo para resposta de deleção:
 export interface DeleteDocumentTypeResponse {
   success: boolean;
   message: string;
-   null;
+  data: {
+    message: string;
+    deleted_id: number;
+  } | null; // Pode ser null em caso de erro
   error_code: string | null;
   errors: string[] | null;
 }
