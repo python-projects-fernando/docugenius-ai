@@ -1,10 +1,8 @@
-// src/pages/Login.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
 import type { LoginRequestDTO, LoginResponseDTO, User, UserRole } from '../types/auth';
 
-// Adiciona uma prop para receber a função de atualização do usuário
 interface LoginProps {
   onLoginSuccess: (user: User) => void;
 }
@@ -24,10 +22,9 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     }
 
     try {
-      console.log('Sending data:', { identifier, password });
 
       const requestBody: LoginRequestDTO = {
-        identifier, // Nome correto esperado pelo backend
+        identifier,
         password,
       };
 
@@ -39,61 +36,47 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         body: JSON.stringify(requestBody),
       });
 
-      console.log('Response received:', response.status);
 
-      const data: LoginResponseDTO = await response.json(); // Tipa a resposta com o nome correto da variável
-      console.log('Response ', data);
+      const data: LoginResponseDTO = await response.json();
 
-      if (response.ok && data.success) { // Checa se a resposta foi bem-sucedida e se data.success é true
-        // Extrai o papel (role) do usuário da resposta usando o DTO
+      if (response.ok && data.success) {
         const userRole: UserRole = data.data.user.role;
         const userDataFromResponse = data.data.user;
 
-        // Opcional: Converter a resposta do backend para o tipo User do frontend
-        // Isso é útil se os campos forem ligeiramente diferentes entre backend e frontend.
         const frontendUser: User = {
-          id: userDataFromResponse.id.toString(), // Converte number para string se necessário
+          id: userDataFromResponse.id.toString(),
           username: userDataFromResponse.username,
           email: userDataFromResponse.email,
           role: userDataFromResponse.role,
         };
 
-        // Armazenar dados do usuário no localStorage (opcional, mas comum)
         localStorage.setItem('user', JSON.stringify(frontendUser));
-        localStorage.setItem('accessToken', data.data.access_token); // Armazene o token se for usar
+        localStorage.setItem('accessToken', data.data.access_token);
 
-        // Chama a função de callback passada do App.tsx para atualizar o estado lá
         onLoginSuccess(frontendUser);
 
-        // Verifica o papel do usuário e redireciona
         if (userRole === 'admin') {
-          alert('Welcome, Administrator!');
-          navigate('/admin/dashboard'); // Redireciona para o dashboard do admin
+          navigate('/admin/dashboard');
         } else if (userRole === 'common') {
-          alert('Welcome, User!');
-          navigate('/'); // Exemplo: redireciona para a home
+          navigate('/');
         } else {
-          // Tratar outros papéis se necessário
-          alert(`Welcome, ${userDataFromResponse.username}! Role: ${userRole}`);
-          navigate('/'); // Exemplo: redireciona para a home
+          navigate('/');
         }
 
       } else {
-        // Tenta obter a mensagem de erro da resposta
         let errorMessage = data.message || `Error ${response.status}: ${response.statusText}`;
-        // Ajuste aqui se a estrutura de erro for diferente
+
         if (response.status === 422) {
-          // Exemplo: se a API retornar detalhes de erro em 'errors'
           if (Array.isArray(data.errors) && data.errors.length > 0) {
              errorMessage = `Validation Error: ${data.errors.map(e => e.msg).join(', ')}`;
           } else {
-             errorMessage = 'Validation Error: Please check the provided data.'; // Mensagem genérica
+             errorMessage = 'Validation Error: Please check the provided data.';
           }
         }
+
         setError(errorMessage);
       }
     } catch (err) {
-      console.error('Network or server error:', err);
       setError('Network or server error. Please try again later.');
     }
   };

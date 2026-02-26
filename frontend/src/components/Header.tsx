@@ -1,21 +1,18 @@
-// src/components/Header.tsx
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import type { User } from '../types/auth'; // Importe o tipo User
+import type { User } from '../types/auth';
 
-// Interface define a forma das props
 interface HeaderProps {
-  currentUser: User | null; // Usuário logado ou null
-  onLogout: () => void;    // Função para lidar com o logout
+  currentUser: User | null;
+  onLogout: () => void;
 }
 
-// Componente Header recebe as props e as utiliza
 const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    onLogout(); // Chama a função de logout passada via props
-    navigate('/'); // Redireciona para a página inicial após logout
+    onLogout();
+    navigate('/');
   };
 
   return (
@@ -31,7 +28,6 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
         </Link>
 
         <nav className="hidden md:flex space-x-8">
-          {/* Exibe links baseados no papel do usuário ou estado de login, se necessário */}
           {currentUser && (
             <>
               {currentUser.role === 'admin' && (
@@ -39,17 +35,12 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
                   Admin Panel
                 </Link>
               )}
-              {/* Exemplo de link comum para ambos os tipos de usuário logados */}
-              {/* <Link to="/dashboard" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                Dashboard
-              </Link> */}
             </>
           )}
         </nav>
 
         <div className="flex items-center space-x-3">
           {currentUser ? (
-            // Se estiver logado, mostra o nome do usuário e o botão de logout
             <>
               <span className="text-sm text-gray-600">Hello, {currentUser.username}</span>
               <button
@@ -60,7 +51,6 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
               </button>
             </>
           ) : (
-            // Se não estiver logado, mostra o botão de login
             <Link to="/login">
               <button className="hidden md:inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-800 rounded-lg hover:bg-gray-50 font-medium transition-colors">
                 Sign In

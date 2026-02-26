@@ -1,8 +1,7 @@
-// src/pages/admin/CreateDocumentType.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../config/api';
-import Modal from '../../components/Modal'; // Importe o componente Modal
+import Modal from '../../components/Modal';
 import type { CreateDocumentTypeRequest, SingleDocumentTypeResponse } from '../../types/documentTypes';
 
 const CreateDocumentType: React.FC = () => {
@@ -11,7 +10,6 @@ const CreateDocumentType: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Estados para controlar as modais
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     title: string;
@@ -26,7 +24,6 @@ const CreateDocumentType: React.FC = () => {
     onConfirm: null,
   });
 
-  // Funções para abrir as modais
   const openSuccessModal = (message: string, onConfirm?: () => void) => {
     setModalState({
       isOpen: true,
@@ -46,10 +43,9 @@ const CreateDocumentType: React.FC = () => {
     });
   };
 
-  // Função para fechar a modal
   const closeModal = () => {
     if (modalState.onConfirm) {
-      modalState.onConfirm(); // Executa o callback antes de fechar
+      modalState.onConfirm();
     }
     setModalState(prev => ({ ...prev, isOpen: false }));
   };
@@ -65,7 +61,6 @@ const CreateDocumentType: React.FC = () => {
     setError(null);
 
     try {
-      // Lê o token de acesso do localStorage
       const accessToken = localStorage.getItem('accessToken');
       if (!accessToken) {
         throw new Error('Access token not found in localStorage.');
@@ -83,20 +78,17 @@ const CreateDocumentType: React.FC = () => {
       const data: SingleDocumentTypeResponse = await response.json();
 
       if (response.ok && data.success) {
-        // Substitui alert por modal de sucesso, com callback de redirecionamento
         openSuccessModal(
           data.message || 'Document type created successfully!',
           () => navigate('/admin/document-types')
         );
       } else {
-        // Se a API retornar success: false ou status != 2xx, tenta pegar a mensagem de erro
         throw new Error(data.message || `HTTP error! Status: ${response.status}`);
       }
     } catch (err) {
-      console.error('Erro ao criar tipo de documento:', err);
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage); // Mostra erro na página (como antes)
-      openErrorModal(errorMessage); // E também mostra em modal
+      setError(errorMessage);
+      openErrorModal(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -104,7 +96,6 @@ const CreateDocumentType: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Renderiza a Modal */}
       <Modal
         isOpen={modalState.isOpen}
         onClose={closeModal}
@@ -171,7 +162,7 @@ const CreateDocumentType: React.FC = () => {
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
-                onClick={() => navigate('/admin/document-types')} // Voltar para a lista
+                onClick={() => navigate('/admin/document-types')}
                 className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors"
               >
                 Cancel

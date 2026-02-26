@@ -1,4 +1,3 @@
-// src/pages/admin/EditDocumentType.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { API_BASE_URL } from '../../config/api';
@@ -10,12 +9,10 @@ const EditDocumentType: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Estado para os dados do formulário
   const [formData, setFormData] = useState<DocumentType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Estados para modais
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     title: string;
@@ -30,7 +27,6 @@ const EditDocumentType: React.FC = () => {
     onConfirm: null,
   });
 
-  // Funções de modal
   const openSuccessModal = (message: string, onConfirm?: () => void) => {
     setModalState({
       isOpen: true,
@@ -57,18 +53,15 @@ const EditDocumentType: React.FC = () => {
     setModalState(prev => ({ ...prev, isOpen: false }));
   };
 
-  // Carrega os dados do estado da navegação ou faz fallback para GET
   useEffect(() => {
     const locationState = location.state as { documentType?: DocumentType } | null;
 
-    // 1. Tenta carregar do state da navegação (caso de clique em "Edit" na lista)
     if (locationState?.documentType) {
       setFormData(locationState.documentType);
       setLoading(false);
       return;
     }
 
-    // 2. Se não vier do state, tenta buscar do backend (caso de acesso direto à URL)
     const fetchFromBackend = async () => {
       try {
         setLoading(true);
@@ -79,7 +72,6 @@ const EditDocumentType: React.FC = () => {
           throw new Error('Access token not found in localStorage.');
         }
 
-        // Endpoint correto para buscar UM tipo de documento (provavelmente /user/)
         const response = await fetch(`${API_BASE_URL}/user/document-types/${id}`, {
           method: 'GET',
           headers: {
@@ -100,7 +92,6 @@ const EditDocumentType: React.FC = () => {
           throw new Error(data.message || 'Failed to fetch document type');
         }
       } catch (err) {
-        console.error('Erro ao buscar tipo de documento:', err);
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
         setError(errorMessage);
         openErrorModal(errorMessage);
@@ -117,7 +108,6 @@ const EditDocumentType: React.FC = () => {
     }
   }, [id, location.state]);
 
-  // Função para lidar com mudanças no formulário
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (formData) {
@@ -125,7 +115,6 @@ const EditDocumentType: React.FC = () => {
     }
   };
 
-  // Função para submeter o formulário (PUT)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData) return;
@@ -157,13 +146,12 @@ const EditDocumentType: React.FC = () => {
       if (data.success) {
         openSuccessModal(
           data.message || 'Document type updated successfully!',
-          () => navigate('/admin/document-types') // Redireciona após fechar a modal
+          () => navigate('/admin/document-types')
         );
       } else {
         throw new Error(data.message || 'Failed to update document type.');
       }
     } catch (err) {
-      console.error('Erro ao atualizar tipo de documento:', err);
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(errorMessage);
       openErrorModal(errorMessage);
@@ -172,7 +160,6 @@ const EditDocumentType: React.FC = () => {
     }
   };
 
-  // Renderiza loading enquanto busca os dados
   if (loading && !formData) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -186,7 +173,6 @@ const EditDocumentType: React.FC = () => {
     );
   }
 
-  // Renderiza erro se houve falha ao carregar
   if (error && !formData) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -202,12 +188,10 @@ const EditDocumentType: React.FC = () => {
     );
   }
 
-  // Renderiza o formulário quando os dados estão prontos
-  if (!formData) return null; // Caso extremo, não deve acontecer
+  if (!formData) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Modal */}
       <Modal
         isOpen={modalState.isOpen}
         onClose={closeModal}
@@ -238,7 +222,9 @@ const EditDocumentType: React.FC = () => {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Edit Document Type - ID: {formData.id}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">
+            Edit Document Type - ID: {formData.id}
+          </h1>
 
           {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">{error}</div>}
 
