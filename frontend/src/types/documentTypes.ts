@@ -39,10 +39,29 @@ export interface SingleDocumentTypeResponse {
 export interface DeleteDocumentTypeResponse {
   success: boolean;
   message: string;
-  data: {
+  {
     message: string;
     deleted_id: number;
   } | null;
+  error_code: string | null;
+  errors: string[] | null;
+}
+
+export interface SuggestDocumentTypesRequest {
+  business_description: string;
+}
+
+export interface SuggestedDocumentType {
+  name: string;
+  description: string;
+}
+
+export interface SuggestDocumentTypesResponse {
+  success: boolean;
+  message: string;
+  {
+    suggested_document_types: SuggestedDocumentType[];
+  };
   error_code: string | null;
   errors: string[] | null;
 }
