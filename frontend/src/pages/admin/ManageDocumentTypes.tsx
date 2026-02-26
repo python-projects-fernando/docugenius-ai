@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../../config/api';
+import Modal from '../../components/Modal'; // Importe o componente Modal
 import type { DocumentType, ListDocumentTypesResponse, DeleteDocumentTypeResponse } from '../../types/documentTypes';
 
 const ManageDocumentTypes: React.FC = () => {
@@ -9,9 +10,69 @@ const ManageDocumentTypes: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Estados para controlar as modais
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'confirm'; // Tipos de modal
+    onConfirm?: (() => void) | null; // Callback para ação de confirmação
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'success',
+    onConfirm: null,
+  });
+
   // Parâmetros de paginação (exemplo)
   const page = 1;
   const size = 100;
+
+  // Função para abrir a modal de sucesso (com callback opcional)
+  const openSuccessModal = (message: string, onConfirm?: () => void) => {
+    setModalState({
+      isOpen: true,
+      title: 'Success',
+      message: message,
+      type: 'success',
+      onConfirm: onConfirm,
+    });
+  };
+
+  // Função para abrir a modal de erro
+  const openErrorModal = (message: string) => {
+    setModalState({
+      isOpen: true,
+      title: 'Error',
+      message: message,
+      type: 'error',
+    });
+  };
+
+  // Função para abrir a modal de confirmação
+  const openConfirmModal = (message: string, onConfirm: () => void) => {
+    setModalState({
+      isOpen: true,
+      title: 'Confirm Action',
+      message: message,
+      type: 'confirm',
+      onConfirm: onConfirm, // Armazena a função de confirmação
+    });
+  };
+
+    // Função para fechar a modal
+  const closeModal = () => {
+    setModalState(prev => ({ ...prev, isOpen: false }));
+  };
+
+  // Função para lidar com a confirmação na modal
+  const handleConfirm = () => {
+    if (modalState.onConfirm) {
+      modalState.onConfirm(); // Chama a função de confirmação passada
+    }
+    closeModal(); // Fecha a modal após confirmar
+  };
 
   // Função para buscar os tipos de documento
   const fetchDocumentTypes = async () => {
@@ -37,7 +98,7 @@ const ManageDocumentTypes: React.FC = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data:  ListDocumentTypesResponse = await response.json();
+      const data: ListDocumentTypesResponse = await response.json();
 
       if (data.success) {
         setDocumentTypes(data.data.items);
@@ -47,58 +108,72 @@ const ManageDocumentTypes: React.FC = () => {
       }
     } catch (err) {
       console.error('Erro ao buscar tipos de documento:', err);
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage); // Mostra erro na página
+      // openErrorModal(errorMessage); // Opcional: mostrar erro em modal também
     } finally {
       setLoading(false);
     }
   };
 
-  // Função para deletar um tipo de documento
+    // Função para deletar um tipo de documento
   const deleteDocumentType = async (id: number) => {
-    if (!window.confirm(`Are you sure you want to delete the document type with ID ${id}?`)) {
-      return; // Sai da função se o usuário cancelar
-    }
+    // Abre a modal de confirmação
+    openConfirmModal(`Are you sure you want to delete the document type with ID ${id}?`, async () => {
+      try {
+        // Lê o token de acesso do localStorage
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+          throw new Error('Access token not found in localStorage.');
+        }
 
-    try {
-      // Lê o token de acesso do localStorage
-      const accessToken = localStorage.getItem('accessToken');
-      if (!accessToken) {
-        throw new Error('Access token not found in localStorage.');
+        const response = await fetch(`${API_BASE_URL}/admin/document-types/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data: DeleteDocumentTypeResponse = await response.json();
+
+        // Validação básica da resposta
+        if (!data || typeof data.success !== 'boolean') {
+          throw new Error('Invalid response from server.');
+        }
+
+        if (data.success) {
+          console.log('Deletion successful:', data);
+          // ✅ Sucesso: remove o item da lista e fecha a modal
+          setDocumentTypes(prevTypes => prevTypes.filter(type => type.id !== id));
+          closeModal(); // Fecha a modal de confirmação imediatamente
+        } else {
+          // ❌ Falha: mostra erro na modal de confirmação (ou em uma nova modal de erro, se preferir)
+          throw new Error(data.message || 'Failed to delete document type.');
+        }
+      } catch (err) {
+        console.error('Erro ao deletar tipo de documento:', err);
+        // Mostra o erro na própria modal de confirmação (substituindo a mensagem)
+        setModalState(prev => ({
+          ...prev,
+          title: 'Error',
+          message: err instanceof Error ? err.message : 'An unknown error occurred.',
+          type: 'error',
+          onConfirm: undefined, // Remove o callback de confirmação
+        }));
+        // Ou, se preferir uma modal separada de erro, use: openErrorModal(...)
       }
-
-      const response = await fetch(`${API_BASE_URL}/admin/document-types/${id}`, { // Note o ID na URL
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data:  DeleteDocumentTypeResponse = await response.json();
-
-      if (data.success) {
-        console.log('Deletion response:', data); // Log para ver a resposta real
-        alert(data.message); // Mostra a mensagem de sucesso da API
-        // Atualiza a lista removendo o item deletado
-        setDocumentTypes(prevTypes => prevTypes.filter(type => type.id !== id));
-      } else {
-        // Se a API retornar success: false, tenta pegar a mensagem de erro
-        throw new Error(data.message || 'Failed to delete document type');
-      }
-    } catch (err) {
-      console.error('Erro ao deletar tipo de documento:', err);
-      alert(err instanceof Error ? err.message : 'An unknown error occurred during deletion.');
-    }
+    });
   };
 
   // Busca os dados ao montar o componente
   useEffect(() => {
     fetchDocumentTypes();
-  }, [page, size]); // Dependências: refaz a busca se page ou size mudar
+  }, [page, size]);
 
   if (loading) {
     return (
@@ -127,6 +202,51 @@ const ManageDocumentTypes: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+            {/* Renderiza a Modal */}
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        title={modalState.title}
+        footer={
+          <>
+            {modalState.type === 'success' && (
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+              >
+                OK
+              </button>
+            )}
+            {modalState.type === 'error' && (
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+              >
+                Close
+              </button>
+            )}
+            {modalState.type === 'confirm' && (
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={closeModal}
+                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirm}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  Confirm
+                </button>
+              </div>
+            )}
+          </>
+        }
+      >
+        <p>{modalState.message}</p>
+      </Modal>
+
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-6">
