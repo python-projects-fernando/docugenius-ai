@@ -1,11 +1,12 @@
 // src/pages/admin/ManageDocumentTypes.tsx
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../config/api';
 import Modal from '../../components/Modal'; // Importe o componente Modal
 import type { DocumentType, ListDocumentTypesResponse, DeleteDocumentTypeResponse } from '../../types/documentTypes';
 
 const ManageDocumentTypes: React.FC = () => {
+  const navigate = useNavigate();
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -298,9 +299,12 @@ const ManageDocumentTypes: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium w-48">
                       {/* Links para editar e excluir */}
-                      <Link to={`/admin/document-types/${type.id}/edit`} className="text-indigo-600 hover:text-indigo-900 mr-4">
-                        Edit
-                      </Link>
+                      <button
+                          onClick={() => navigate(`/admin/document-types/${type.id}/edit`, { state: { documentType: type } })}
+                          className="text-indigo-600 hover:text-indigo-900 mr-4"
+                        >
+                          Edit
+                      </button>
                       <button
                         onClick={() => deleteDocumentType(type.id)}
                         className="text-red-600 hover:text-red-900"

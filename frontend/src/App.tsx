@@ -7,7 +7,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageDocumentTypes from './pages/admin/ManageDocumentTypes';
-import CreateDocumentType from './pages/admin/CreateDocumentType'; // Importe o novo componente
+import CreateDocumentType from './pages/admin/CreateDocumentType';
+import EditDocumentType from './pages/admin/EditDocumentType'; // Importe o novo componente
 import type { User } from './types/auth';
 
 // Componente da Página Inicial (mantendo seu código atual, MAS SEM O HEADER e SEM O FOOTER)
@@ -155,6 +156,12 @@ const App: React.FC = () => {
             <Route path="/admin/document-types/new" element={
               <ProtectedRoute allowedRoles={['admin']} currentUser={currentUser}>
                 <CreateDocumentType />
+              </ProtectedRoute>
+            } />
+            {/* Nova rota protegida para editar tipo de documento */}
+            <Route path="/admin/document-types/:id/edit" element={
+              <ProtectedRoute allowedRoles={['admin']} currentUser={currentUser}>
+                <EditDocumentType />
               </ProtectedRoute>
             } />
             {/* Rota curinga para páginas não encontradas (opcional) */}
