@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../config/api';
 import Modal from '../../components/Modal';
 import type { DocumentType, ListDocumentTypesResponse, DeleteDocumentTypeResponse } from '../../types/documentTypes';
+import DocumentTypeList from '../../components/DocumentTypeList';
 
 const ManageDocumentTypes: React.FC = () => {
   const navigate = useNavigate();
@@ -233,54 +234,12 @@ const ManageDocumentTypes: React.FC = () => {
               </button>
             </Link>
           </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200 table-auto">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {documentTypes.map((type) => (
-                  <tr key={type.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{type.id}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{type.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div
-                        className="text-sm text-gray-500 truncate"
-                        style={{ maxWidth: '200px' }}
-                        title={type.description}
-                      >
-                        {type.description}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium w-48">
-                      <button
-                        onClick={() => navigate(`/admin/document-types/${type.id}/edit`, { state: { documentType: type } })}
-                        className="text-indigo-600 hover:text-indigo-900 mr-4"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteDocumentType(type.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DocumentTypeList
+            documentTypes={documentTypes}
+            onEdit={(type) => navigate(`/admin/document-types/${type.id}/edit`, { state: { documentType: type } })}
+            onDelete={deleteDocumentType}
+            actionsEnabled={true}
+          />
         </div>
       </main>
     </div>
