@@ -1,7 +1,7 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import delete, update, func
+from sqlalchemy import delete, update, func, asc
 from backend.application.repositories.document_type_repository import DocumentTypeRepository
 from backend.core.models.document_type import DocumentType as CoreDocumentType
 from backend.infrastructure.models.document_type_model import DocumentTypeModel as InfraDocumentType
@@ -93,7 +93,7 @@ class MySqlDocumentTypeRepository(DocumentTypeRepository):
 
     async def find_all_paginated(self, offset: int, limit: int) -> List[CoreDocumentType]:
         result = await self._db_session.execute(
-                select(InfraDocumentType).offset(offset).limit(limit)
+                select(InfraDocumentType).order_by(InfraDocumentType.name.asc()).offset(offset).limit(limit)
             )
         infra_doc_types = result.scalars().all()
         return [
