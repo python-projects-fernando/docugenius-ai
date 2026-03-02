@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config/api';
 import DocumentTypeSelector from '../../components/DocumentTypeSelector';
-import Modal from '../../components/Modal'; // Importe o componente Modal
+import Modal from '../../components/Modal';
 import { FIELD_TYPES } from '../../constants/fieldTypes';
 import type {
   DocumentType,
@@ -12,6 +12,9 @@ import type {
   CreateDocumentFieldRequest,
   SingleDocumentFieldResponse,
   DeleteDocumentFieldResponse,
+  SuggestDocumentFieldsRequest, // Importe o novo tipo
+  SuggestedField,              // Importe o novo tipo
+  SuggestDocumentFieldsResponse, // Importe o novo tipo
 } from '../../types/documentTypes';
 
 const ManageDocumentFields: React.FC = () => {
@@ -27,21 +30,26 @@ const ManageDocumentFields: React.FC = () => {
   const [newFieldData, setNewFieldData] = useState<Omit<CreateDocumentFieldRequest, 'document_type_id'>>({
     name: '',
     description: '',
-    field_type: 'text', // <-- Corrigido
-    is_required: false,  // <-- Corrigido
+    field_type: 'text',
+    is_required: false,
   });
 
   // Estados para controle da edição de campos
   const [editingFieldId, setEditingFieldId] = useState<number | null>(null);
   const [editingFieldData, setEditingFieldData] = useState<Partial<DocumentField>>({});
 
+  // Estados para controle da sugestão de campos (NOVO)
+  const [suggestedFields, setSuggestedFields] = useState<SuggestedField[]>([]);
+  const [loadingSuggestion, setLoadingSuggestion] = useState<boolean>(false);
+  const [errorSuggestion, setErrorSuggestion] = useState<string | null>(null);
+
   // Estados para controlar as modais
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     title: string;
     message: string;
-    type: 'success' | 'error' | 'confirm'; // Tipos de modal
-    onConfirm?: (() => void) | null; // Callback para ação de confirmação
+    type: 'success' | 'error' | 'confirm';
+    onConfirm?: (() => void) | null;
   }>({
     isOpen: false,
     title: '',
@@ -80,7 +88,7 @@ const ManageDocumentFields: React.FC = () => {
       title: 'Confirm Action',
       message: message,
       type: 'confirm',
-      onConfirm: onConfirm, // Armazena a função de confirmação
+      onConfirm: onConfirm,
     });
   };
 
@@ -189,13 +197,12 @@ const ManageDocumentFields: React.FC = () => {
       }
 
       // Prepara os dados para envio, incluindo o ID do tipo de documento selecionado
-      // Os campos aqui devem corresponder EXATAMENTE aos nomes esperados pelo backend
       const payload: CreateDocumentFieldRequest = {
-        ...newFieldData, // name, description, field_type, is_required
-        document_type_id: selectedDocumentType.id, // <-- Certifique-se que este ID está correto
+        ...newFieldData,
+        document_type_id: selectedDocumentType.id,
       };
 
-      console.log("Enviando payload:", payload); // Adicione este log para debug
+      console.log("Enviando payload:", payload);
 
       const response = await fetch(`${API_BASE_URL}/admin/document-fields/`, {
         method: 'POST',
@@ -207,33 +214,29 @@ const ManageDocumentFields: React.FC = () => {
       });
 
       if (!response.ok) {
-        // Leia o corpo da resposta para obter detalhes do erro
-        const errorBody = await response.text(); // ou response.json() se for JSON
+        const errorBody = await response.text();
         console.error("Erro da API:", errorBody);
         throw new Error(`HTTP error! Status: ${response.status}, Body: ${errorBody}`);
       }
 
-      const data: SingleDocumentFieldResponse = await response.json();
+      const data:  SingleDocumentFieldResponse = await response.json();
 
       if (response.ok && data.success) {
-        // Atualiza a lista local de campos adicionando o novo campo
         setDocumentFields(prev => [...prev, data.data]);
-        // Limpa o formulário
         setNewFieldData({
           name: '',
           description: '',
-          field_type: 'text', // <-- Corrigido
-          is_required: false,  // <-- Corrigido
+          field_type: 'text',
+          is_required: false,
         });
-        openSuccessModal(data.message || 'Field added successfully!'); // Usar modal
+        openSuccessModal(data.message || 'Field added successfully!');
       } else {
-        // A API retornou success: false
         throw new Error(data.message || 'API returned success: false');
       }
     } catch (err) {
       console.error('Erro ao adicionar campo:', err);
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred while adding the field.';
-      openErrorModal(errorMessage); // Usar modal
+      openErrorModal(errorMessage);
     }
   };
 
@@ -305,7 +308,7 @@ const ManageDocumentFields: React.FC = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data: SingleDocumentFieldResponse = await response.json();
+      const data:  SingleDocumentFieldResponse = await response.json();
 
       if (response.ok && data.success) {
         // Atualiza a lista local de campos com os dados editados
@@ -332,8 +335,6 @@ const ManageDocumentFields: React.FC = () => {
   };
 
   // Função para deletar um campo
-      // Função para deletar um campo
-    // Função para deletar um campo
   const deleteField = async (fieldId: number) => {
     openConfirmModal(`Are you sure you want to delete the field with ID ${fieldId}?`, async () => {
       try {
@@ -354,7 +355,7 @@ const ManageDocumentFields: React.FC = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const data: DeleteDocumentFieldResponse = await response.json();
+        const data:  DeleteDocumentFieldResponse = await response.json();
 
         if (!data || typeof data.success !== 'boolean') {
           throw new Error('Invalid response from server.');
@@ -382,20 +383,133 @@ const ManageDocumentFields: React.FC = () => {
     });
   };
 
+  // Função para solicitar sugestões de campos via IA (NOVO)
+  const handleSuggestFields = async () => {
+    if (!selectedDocumentType) return;
+
+    try {
+      setLoadingSuggestion(true);
+      setErrorSuggestion(null);
+      setSuggestedFields([]); // Limpa sugestões anteriores
+
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+        throw new Error('Access token not found in localStorage.');
+      }
+
+      const requestPayload: SuggestDocumentFieldsRequest = {
+        document_type_name: selectedDocumentType.name,
+        document_type_description: selectedDocumentType.description,
+      };
+
+      const response = await fetch(`${API_BASE_URL}/admin/document-fields/suggest`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestPayload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data: SuggestDocumentFieldsResponse = await response.json();
+
+      if (response.ok && data.success) {
+        // Extrai a lista de campos sugeridos da resposta
+        setSuggestedFields(data.data.fields);
+      } else {
+        throw new Error(data.message || 'Failed to get field suggestions.');
+      }
+    } catch (err) {
+      console.error('Erro ao sugerir campos de documento:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setErrorSuggestion(errorMessage);
+      openErrorModal(errorMessage);
+    } finally {
+      setLoadingSuggestion(false);
+    }
+  };
+
+  // Função para salvar um campo sugerido individualmente (NOVO)
+  const saveSuggestedField = async (suggestedField: SuggestedField) => {
+    if (!selectedDocumentType) return;
+
+    try {
+      setLoadingFields(true); // Reutiliza o loading da lista de campos
+      setErrorFields(null);
+
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+        throw new Error('Access token not found in localStorage.');
+      }
+
+      // Monta o payload para criar o campo sugerido
+      // Mapeia 'type' e 'required' do SuggestedField para os campos esperados pelo CreateDocumentFieldRequest
+      const payload: CreateDocumentFieldRequest = {
+        name: suggestedField.name,
+        description: suggestedField.description,
+        field_type: suggestedField.type,
+        is_required: suggestedField.required,
+        document_type_id: selectedDocumentType.id, // Usa o ID do tipo selecionado
+      };
+
+      const response = await fetch(`${API_BASE_URL}/admin/document-fields/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error("Erro da API ao salvar campo sugerido:", errorBody);
+        throw new Error(`HTTP error! Status: ${response.status}, Body: ${errorBody}`);
+      }
+
+      const data: SingleDocumentFieldResponse = await response.json();
+
+      if (response.ok && data.success) {
+        // Atualiza a lista local de campos adicionando o novo campo
+        setDocumentFields(prev => [...prev, data.data]);
+        // Opcional: Remover o campo sugerido da lista de sugestões locais após salvá-lo
+        setSuggestedFields(prev => prev.filter(f => f.name !== suggestedField.name || f.description !== suggestedField.description));
+        openSuccessModal(data.message || 'Suggested field saved successfully!');
+      } else {
+        throw new Error(data.message || 'API returned success: false while saving suggested field.');
+      }
+    } catch (err) {
+      console.error('Erro ao salvar campo sugerido:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred while saving the suggested field.';
+      setErrorFields(errorMessage);
+      openErrorModal(errorMessage);
+    } finally {
+      setLoadingFields(false);
+    }
+  };
+
   // Busca os tipos ao montar o componente
   useEffect(() => {
     fetchAllDocumentTypes();
   }, []);
 
-  // Busca os campos sempre que selectedDocumentType mudar
+    // Busca os campos sempre que selectedDocumentType mudar
   useEffect(() => {
+    // Limpa as sugestões e erros de sugestão ao trocar de tipo de documento
+    setSuggestedFields([]);
+    setErrorSuggestion(null);
+
     if (selectedDocumentType) {
       fetchDocumentFields(selectedDocumentType.id);
     } else {
       // Limpa campos ao sair do modo de edição
       setDocumentFields([]);
     }
-  }, [selectedDocumentType]);
+  }, [selectedDocumentType]); // <-- Dependência correta
 
   // Função chamada quando um tipo é selecionado no selector
   const handleSelectDocumentType = (type: DocumentType) => {
@@ -487,7 +601,7 @@ const ManageDocumentFields: React.FC = () => {
                 <p className="text-gray-600 mb-4">Document Type ID: {selectedDocumentType.id}</p>
                 <p className="text-gray-500 mb-6">
                   {documentFields.length > 0
-                    ? "Below are the existing fields. You can edit them or add new ones."
+                    ? "Below are the existing fields. You can new ones."
                     : "No fields found for this document type. Add new fields below."}
                 </p>
 
@@ -623,7 +737,7 @@ const ManageDocumentFields: React.FC = () => {
                 </div>
 
                 {/* Formulário para adicionar novos campos */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">Add New Field</h2>
                   <p className="text-gray-500 mb-4">Enter details for the new field.</p>
 
@@ -655,7 +769,7 @@ const ManageDocumentFields: React.FC = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
-                      <div>
+                    <div>
                       <label htmlFor="newFieldType" className="block text-sm font-medium text-gray-700 mb-1">
                         Type *
                       </label>
@@ -696,6 +810,59 @@ const ManageDocumentFields: React.FC = () => {
                       </button>
                     </div>
                   </form>
+                </div>
+
+                {/* Seção de Sugestão de Campos via IA - NOVA SEÇÃO - ABAIXO DO FORMULÁRIO DE ADD NEW FIELD */}
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-4">AI-Powered Field Suggestions</h2>
+                  <button
+                    onClick={handleSuggestFields}
+                    disabled={loadingSuggestion}
+                    className={`px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors ${loadingSuggestion ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  >
+                    {loadingSuggestion ? 'Generating...' : 'Generate Field Suggestions'}
+                  </button>
+
+                  {errorSuggestion && (
+                    <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg">
+                      {errorSuggestion}
+                    </div>
+                  )}
+
+                  {suggestedFields.length > 0 && (
+                    <div className="mt-6 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium text-gray-900">Suggested Fields</h3>
+                        <button
+                          onClick={handleSuggestFields} // Reenvia a mesma solicitação
+                          disabled={loadingSuggestion}
+                          className={`px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors ${loadingSuggestion ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        >
+                          Regenerate
+                        </button>
+                      </div>
+                      <ul className="divide-y divide-gray-200">
+                        {suggestedFields.map((suggested, index) => (
+                          <li key={index} className="py-4 flex justify-between items-start">
+                            <div>
+                              <h4 className="font-medium text-gray-900">{suggested.name}</h4>
+                              <p className="text-sm text-gray-500 mt-1">{suggested.description}</p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                Type: {suggested.type} | Required: {suggested.required ? 'Yes' : 'No'}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => saveSuggestedField(suggested)}
+                              disabled={loadingFields} // Reutiliza o loading da lista de campos
+                              className={`ml-4 px-3 py-1 text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors ${loadingFields ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            >
+                              Save
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

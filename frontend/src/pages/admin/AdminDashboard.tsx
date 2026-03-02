@@ -29,7 +29,7 @@ const AdminDashboard: React.FC = () => {
               <p className="text-gray-600">Manage fields within document types.</p>
             </Link>
 
-            <Link to="/generate" className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow flex flex-col items-center justify-center text-center">
+            {/*<Link to="/generate" className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -37,7 +37,7 @@ const AdminDashboard: React.FC = () => {
               </div>
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Generate Document</h2>
               <p className="text-gray-600">Test the document generation process.</p>
-            </Link>
+            </Link>*/}
           </div>
         </div>
       </main>

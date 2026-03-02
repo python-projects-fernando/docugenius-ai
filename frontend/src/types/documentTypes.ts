@@ -37,7 +37,7 @@ export interface ListDocumentFieldsResponse {
   errors: string[] | null;
 }
 
-export interface CreateDocumentTypeRequest {
+exportRequest {
   name: string;
   description: string;
 }
@@ -104,6 +104,35 @@ export interface SuggestDocumentTypesResponse {
   message: string;
   data: {
     suggested_document_types: SuggestedDocumentType[];
+  };
+  error_code: string | null;
+  errors: string[] | null;
+}
+
+// --- Tipos para a funcionalidade de Sugestão de Campos de Documento ---
+export interface SuggestDocumentFieldsRequest {
+  document_type_name: string;
+  document_type_description: string;
+}
+
+export interface SuggestedField {
+  name: string;
+  type: string; // Tipo do campo sugerido (equivale a field_type)
+  required: boolean; // Se é obrigatório (equivale a is_required)
+  description: string; // Descrição do campo sugerido
+}
+
+export interface SuggestedDocumentTypeWithFields {
+  document_type: string; // Nome do tipo de documento
+  description: string; // Descrição do tipo de documento
+  fields: SuggestedField[]; // Lista de campos sugeridos
+}
+
+export interface SuggestDocumentFieldsResponse {
+  success: boolean;
+  message: string;
+   {
+    data: SuggestedDocumentTypeWithFields; // A estrutura da resposta é ligeiramente diferente
   };
   error_code: string | null;
   errors: string[] | null;
