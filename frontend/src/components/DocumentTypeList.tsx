@@ -1,4 +1,3 @@
-// src/components/DocumentTypeList.tsx
 import React from 'react';
 import type { DocumentType } from '../types/documentTypes';
 

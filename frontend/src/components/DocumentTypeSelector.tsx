@@ -1,12 +1,11 @@
-// src/components/DocumentTypeSelector.tsx
 import React from 'react';
-import type { DocumentType } from '../types/documentTypes'; // Ajuste o caminho se necessário
+import type { DocumentType } from '../types/documentTypes';
 
 interface DocumentTypeSelectorProps {
   documentTypes: DocumentType[];
-  onSelect: (type: DocumentType) => void; // Callback para quando um tipo é selecionado
-  loading?: boolean; // Opcional: para mostrar estado de carregamento
-  error?: string | null; // Opcional: para mostrar mensagem de erro
+  onSelect: (type: DocumentType) => void;
+  loading?: boolean;
+  error?: string | null;
 }
 
 const DocumentTypeSelector: React.FC<DocumentTypeSelectorProps> = ({

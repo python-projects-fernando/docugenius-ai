@@ -81,11 +81,10 @@ export interface SingleDocumentFieldResponse {
   errors: string[] | null;
 }
 
-// Exemplo para deletar campo de documento
 export interface DeleteDocumentFieldResponse {
   success: boolean;
   message: string;
-   boolean; // O campo 'data' é um booleano indicando sucesso/falha da operação
+   boolean;
   error_code: string | null;
   errors: string[] | null;
 }
@@ -109,7 +108,6 @@ export interface SuggestDocumentTypesResponse {
   errors: string[] | null;
 }
 
-// --- Tipos para a funcionalidade de Sugestão de Campos de Documento ---
 export interface SuggestDocumentFieldsRequest {
   document_type_name: string;
   document_type_description: string;
@@ -117,22 +115,22 @@ export interface SuggestDocumentFieldsRequest {
 
 export interface SuggestedField {
   name: string;
-  type: string; // Tipo do campo sugerido (equivale a field_type)
-  required: boolean; // Se é obrigatório (equivale a is_required)
-  description: string; // Descrição do campo sugerido
+  type: string;
+  required: boolean;
+  description: string;
 }
 
 export interface SuggestedDocumentTypeWithFields {
-  document_type: string; // Nome do tipo de documento
-  description: string; // Descrição do tipo de documento
-  fields: SuggestedField[]; // Lista de campos sugeridos
+  document_type: string;
+  description: string;
+  fields: SuggestedField[];
 }
 
 export interface SuggestDocumentFieldsResponse {
   success: boolean;
   message: string;
    {
-    data: SuggestedDocumentTypeWithFields; // A estrutura da resposta é ligeiramente diferente
+    data: SuggestedDocumentTypeWithFields;
   };
   error_code: string | null;
   errors: string[] | null;
