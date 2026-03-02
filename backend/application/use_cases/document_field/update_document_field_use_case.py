@@ -38,25 +38,13 @@ class UpdateDocumentFieldUseCase:
                      )
 
             updated_name = request_dto.name if request_dto.name is not None else existing_field_entity.name
-            updated_type_enum = existing_field_entity.field_type
-            if request_dto.type is not None:
-                try:
-                    if request_dto.type.lower() == "integer":
-                        updated_type_enum = FieldType.INTEGER
-                    elif request_dto.type.lower() == "decimal":
-                        updated_type_enum = FieldType.DECIMAL
-                    else:
-                        updated_type_enum = FieldType(request_dto.type.upper())
-                except (ValueError, AttributeError):
-                    return APIResponse[DocumentFieldResponse](
-                        success=False,
-                        message="Invalid field type provided.",
-                        error_code="INVALID_FIELD_TYPE",
-                        errors=[f"Field type '{request_dto.type}' is not valid."],
-                        data=None
-                    )
 
-            updated_required = request_dto.required if request_dto.required is not None else existing_field_entity.is_required
+            # Assume que request_dto.field_type já é um FieldType Enum (graças ao Pydantic)
+            updated_type_enum = existing_field_entity.field_type  # Valor padrão é o antigo
+            if request_dto.field_type is not None:  # Se o DTO tiver um novo valor
+                updated_type_enum = request_dto.field_type  # Atualiza com o novo valor
+
+            updated_required = request_dto.is_required if request_dto.is_required is not None else existing_field_entity.is_required
             updated_description = request_dto.description if request_dto.description is not None else existing_field_entity.description
 
             updated_field_entity = CoreDocumentField(

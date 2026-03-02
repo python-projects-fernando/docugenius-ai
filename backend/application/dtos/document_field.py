@@ -14,11 +14,8 @@ class CreateDocumentFieldRequest(BaseModel):
 
 class UpdateDocumentFieldRequest(BaseModel):
     name: Optional[str] = Field(None, description="The updated display name of the field (e.g., 'Updated Company Name').", min_length=1)
-    type: Optional[str] = Field(None, description="The updated type of the field "
-                                                  "(e.g., 'text', 'integer', 'decimal', 'textarea', 'select'). "
-                                                  "Must correspond to HTML input types or specific conventions like "
-                                                  "'integer'/'decimal'.")
-    required: Optional[bool] = Field(None, description="Whether the field is mandatory or optional.")
+    field_type: Optional[FieldType] = Field(None, description="The updated type of the field, mapped to HTML input types or concepts (e.g., text, integer, decimal, textarea, select).")
+    is_required: Optional[bool] = Field(None, description="Whether the field is mandatory or optional.")
     description: Optional[str] = Field(None, description="An optional updated description of the field's purpose.")
 
 
