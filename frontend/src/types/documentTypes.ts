@@ -81,13 +81,11 @@ export interface SingleDocumentFieldResponse {
   errors: string[] | null;
 }
 
+// Exemplo para deletar campo de documento
 export interface DeleteDocumentFieldResponse {
   success: boolean;
   message: string;
-  data: {
-    message: string;
-    deleted_id: number;
-  } | null;
+   boolean; // O campo 'data' é um booleano indicando sucesso/falha da operação
   error_code: string | null;
   errors: string[] | null;
 }

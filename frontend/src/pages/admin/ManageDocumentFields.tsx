@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config/api';
 import DocumentTypeSelector from '../../components/DocumentTypeSelector';
+import Modal from '../../components/Modal'; // Importe o componente Modal
+import { FIELD_TYPES } from '../../constants/fieldTypes';
 import type {
   DocumentType,
   ListDocumentTypesResponse,
@@ -9,8 +11,8 @@ import type {
   DocumentField,
   CreateDocumentFieldRequest,
   SingleDocumentFieldResponse,
+  DeleteDocumentFieldResponse,
 } from '../../types/documentTypes';
-import { FIELD_TYPES } from '../../constants/fieldTypes';
 
 const ManageDocumentFields: React.FC = () => {
   const [allDocumentTypes, setAllDocumentTypes] = useState<DocumentType[]>([]);
@@ -22,20 +24,81 @@ const ManageDocumentFields: React.FC = () => {
   const [errorFields, setErrorFields] = useState<string | null>(null);
 
   // Estado para os dados do novo campo
-    const [newFieldData, setNewFieldData] = useState<Omit<CreateDocumentFieldRequest, 'document_type_id'>>({
-      name: '',
-      description: '',
-      field_type: 'text', // <-- Use o valor padrão do enum
-      is_required: false,
-    });
+  const [newFieldData, setNewFieldData] = useState<Omit<CreateDocumentFieldRequest, 'document_type_id'>>({
+    name: '',
+    description: '',
+    field_type: 'text', // <-- Corrigido
+    is_required: false,  // <-- Corrigido
+  });
 
   // Estados para controle da edição de campos
   const [editingFieldId, setEditingFieldId] = useState<number | null>(null);
   const [editingFieldData, setEditingFieldData] = useState<Partial<DocumentField>>({});
 
+  // Estados para controlar as modais
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'confirm'; // Tipos de modal
+    onConfirm?: (() => void) | null; // Callback para ação de confirmação
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'success',
+    onConfirm: null,
+  });
+
   // Parâmetros de paginação (exemplo) para a listagem de tipos
   const pageTypes = 1;
   const sizeTypes = 100;
+
+  // abrir as modais
+  const openSuccessModal = (message: string, onConfirm?: () => void) => {
+    setModalState({
+      isOpen: true,
+      title: 'Success',
+      message: message,
+      type: 'success',
+      onConfirm: onConfirm,
+    });
+  };
+
+  const openErrorModal = (message: string) => {
+    setModalState({
+      isOpen: true,
+      title: 'Error',
+      message: message,
+      type: 'error',
+    });
+  };
+
+  const openConfirmModal = (message: string, onConfirm: () => void) => {
+    setModalState({
+      isOpen: true,
+      title: 'Confirm Action',
+      message: message,
+      type: 'confirm',
+      onConfirm: onConfirm, // Armazena a função de confirmação
+    });
+  };
+
+  // Função para fechar a modal (executa o callback se existir)
+  const closeModal = () => {
+    if (modalState.onConfirm) {
+      modalState.onConfirm(); // Executa o callback antes de fechar
+    }
+    setModalState(prev => ({ ...prev, isOpen: false }));
+  };
+
+  // Função para lidar com a confirmação na modal
+  const handleConfirm = () => {
+    if (modalState.onConfirm) {
+      modalState.onConfirm(); // Chama a função de confirmação passada
+    }
+    closeModal(); // Fecha a modal após confirmar
+  };
 
   // Função para buscar todos os tipos de documento
   const fetchAllDocumentTypes = async () => {
@@ -60,7 +123,7 @@ const ManageDocumentFields: React.FC = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data:  ListDocumentTypesResponse = await response.json();
+      const data: ListDocumentTypesResponse = await response.json();
 
       if (data.success) {
         setAllDocumentTypes(data.data.items);
@@ -117,80 +180,81 @@ const ManageDocumentFields: React.FC = () => {
 
   // Função para adicionar um novo campo
   const addNewField = async () => {
-  if (!selectedDocumentType) return; // Certifique-se de que selectedDocumentType existe
+    if (!selectedDocumentType) return; // Certifique-se de que selectedDocumentType existe
 
-  try {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-      throw new Error('Access token not found in localStorage.');
-    }
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+        throw new Error('Access token not found in localStorage.');
+      }
 
-    // Prepara os dados para envio, incluindo o ID do tipo de documento selecionado
-    // Os campos aqui devem corresponder EXATAMENTE aos nomes esperados pelo backend
-    const payload: CreateDocumentFieldRequest = {
-      ...newFieldData, // name, description, field_type, is_required
-      document_type_id: selectedDocumentType.id, // <-- Certifique-se que este ID está correto
-    };
+      // Prepara os dados para envio, incluindo o ID do tipo de documento selecionado
+      // Os campos aqui devem corresponder EXATAMENTE aos nomes esperados pelo backend
+      const payload: CreateDocumentFieldRequest = {
+        ...newFieldData, // name, description, field_type, is_required
+        document_type_id: selectedDocumentType.id, // <-- Certifique-se que este ID está correto
+      };
 
-    console.log("Enviando payload:", payload); // Adicione este log para debug
+      console.log("Enviando payload:", payload); // Adicione este log para debug
 
-    const response = await fetch(`${API_BASE_URL}/admin/document-fields/`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      // Leia o corpo da resposta para obter detalhes do erro
-      const errorBody = await response.text(); // ou response.json() se for JSON
-      console.error("Erro da API:", errorBody);
-      throw new Error(`HTTP error! Status: ${response.status}, Body: ${errorBody}`);
-    }
-
-    const data: SingleDocumentFieldResponse = await response.json();
-
-    if (response.ok && data.success) {
-      // Atualiza a lista local de campos adicionando o novo campo
-      setDocumentFields(prev => [...prev, data.data]);
-      // Limpa o formulário
-      setNewFieldData({
-        name: '',
-        description: '',
-        field_type: 'text', // <-- Corrigido
-        is_required: false,  // <-- Corrigido
+      const response = await fetch(`${API_BASE_URL}/admin/document-fields/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
-      alert(data.message || 'Field added successfully!');
-    } else {
-      // A API retornou success: false
-      throw new Error(data.message || 'API returned success: false');
+
+      if (!response.ok) {
+        // Leia o corpo da resposta para obter detalhes do erro
+        const errorBody = await response.text(); // ou response.json() se for JSON
+        console.error("Erro da API:", errorBody);
+        throw new Error(`HTTP error! Status: ${response.status}, Body: ${errorBody}`);
+      }
+
+      const data: SingleDocumentFieldResponse = await response.json();
+
+      if (response.ok && data.success) {
+        // Atualiza a lista local de campos adicionando o novo campo
+        setDocumentFields(prev => [...prev, data.data]);
+        // Limpa o formulário
+        setNewFieldData({
+          name: '',
+          description: '',
+          field_type: 'text', // <-- Corrigido
+          is_required: false,  // <-- Corrigido
+        });
+        openSuccessModal(data.message || 'Field added successfully!'); // Usar modal
+      } else {
+        // A API retornou success: false
+        throw new Error(data.message || 'API returned success: false');
+      }
+    } catch (err) {
+      console.error('Erro ao adicionar campo:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred while adding the field.';
+      openErrorModal(errorMessage); // Usar modal
     }
-  } catch (err) {
-    console.error('Erro ao adicionar campo:', err);
-    alert(err instanceof Error ? err.message : 'An unknown error occurred while adding the field.');
-  }
-};
+  };
 
   // Handler para alterações no formulário de novo campo
   const handleChangeNewField = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-  const { name, value, type } = e.target;
-  const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    const { name, value, type } = e.target;
+    const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
 
-  switch (name) {
-    case 'name':
-    case 'description':
-    case 'field_type':
-      setNewFieldData(prev => ({ ...prev, [name]: value }));
-      break;
-    case 'is_required':
-      setNewFieldData(prev => ({ ...prev, [name]: val })); // val é booleano para checkbox
-      break;
-    default:
-      console.warn(`Campo desconhecido: ${name}`);
-  }
-};
+    switch (name) {
+      case 'name':
+      case 'description':
+      case 'field_type':
+        setNewFieldData(prev => ({ ...prev, [name]: value }));
+        break;
+      case 'is_required':
+        setNewFieldData(prev => ({ ...prev, [name]: val })); // val é booleano para checkbox
+        break;
+      default:
+        console.warn(`Campo desconhecido: ${name}`);
+    }
+  };
 
   // Handler para submeter o formulário de novo campo
   const handleSubmitNewField = (e: React.FormEvent) => {
@@ -200,32 +264,20 @@ const ManageDocumentFields: React.FC = () => {
 
   // Função para iniciar a edição de um campo
   const startEditing = (field: DocumentField) => {
-  setEditingFieldId(field.id);
-  setEditingFieldData({
-    name: field.name,
-    description: field.description,
-    field_type: field.field_type, // <-- Corrigido
-    is_required: field.is_required, // <-- Corrigido
-   });
+    setEditingFieldId(field.id);
+    setEditingFieldData({
+      name: field.name,
+      description: field.description,
+      field_type: field.field_type,
+      is_required: field.is_required,
+    });
   };
 
   // Handler para alterações no formulário de edição
   const handleChangeEditingField = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-  const { name, value, type } = e.target;
-  const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
-
-  switch (name) {
-    case 'name':
-    case 'description':
-    case 'field_type': // <-- Adicionado
-      setEditingFieldData(prev => ({ ...prev, [name]: value }));
-      break;
-    case 'is_required': // <-- Adicionado
-      setEditingFieldData(prev => ({ ...prev, [name]: val })); // val é booleano para checkbox
-      break;
-    default:
-      console.warn(`Campo desconhecido: ${name}`);
-   }
+    const { name, value, type } = e.target;
+    const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    setEditingFieldData(prev => ({ ...prev, [name]: val }));
   };
 
   // Handler para submeter a edição
@@ -239,7 +291,7 @@ const ManageDocumentFields: React.FC = () => {
         throw new Error('Access token not found in localStorage.');
       }
 
-      // Chamada PATCH para atualizar o campo
+      // Chamada PUT para atualizar o campo
       const response = await fetch(`${API_BASE_URL}/admin/document-fields/${fieldId}`, {
         method: 'PUT',
         headers: {
@@ -253,7 +305,7 @@ const ManageDocumentFields: React.FC = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data:  SingleDocumentFieldResponse = await response.json();
+      const data: SingleDocumentFieldResponse = await response.json();
 
       if (response.ok && data.success) {
         // Atualiza a lista local de campos com os dados editados
@@ -262,13 +314,14 @@ const ManageDocumentFields: React.FC = () => {
         );
         setEditingFieldId(null);
         setEditingFieldData({});
-        alert(data.message || 'Field updated successfully!');
+        openSuccessModal(data.message || 'Field updated successfully!'); // Usar modal
       } else {
         throw new Error(data.message || `HTTP error! Status: ${response.status}`);
       }
     } catch (err) {
       console.error('Erro ao atualizar campo:', err);
-      alert(err instanceof Error ? err.message : 'An unknown error occurred while updating the field.');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred while updating the field.';
+      openErrorModal(errorMessage); // Usar modal
     }
   };
 
@@ -276,6 +329,57 @@ const ManageDocumentFields: React.FC = () => {
   const cancelEditing = () => {
     setEditingFieldId(null);
     setEditingFieldData({});
+  };
+
+  // Função para deletar um campo
+      // Função para deletar um campo
+    // Função para deletar um campo
+  const deleteField = async (fieldId: number) => {
+    openConfirmModal(`Are you sure you want to delete the field with ID ${fieldId}?`, async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+          throw new Error('Access token not found in localStorage.');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/admin/document-fields/${fieldId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data: DeleteDocumentFieldResponse = await response.json();
+
+        if (!data || typeof data.success !== 'boolean') {
+          throw new Error('Invalid response from server.');
+        }
+
+        if (data.success) {
+          // ✅ Atualiza a lista local removendo o campo excluído
+          setDocumentFields(prev => prev.filter(f => f.id !== fieldId));
+          // ✅ Fecha a modal de confirmação imediatamente após a exclusão bem-sucedida
+          closeModal();
+        } else {
+          // ❌ Se a API retornar success: false, lança um erro para ser tratado no catch
+          throw new Error(data.message || 'Failed to delete document field.');
+        }
+      } catch (err) {
+        // ❌ Em caso de erro, atualiza o estado da modal para mostrar o erro
+        setModalState(prev => ({
+          ...prev,
+          title: 'Error',
+          message: err instanceof Error ? err.message : 'An unknown error occurred.',
+          type: 'error',
+          onConfirm: undefined,
+        }));
+      }
+    });
   };
 
   // Busca os tipos ao montar o componente
@@ -308,6 +412,51 @@ const ManageDocumentFields: React.FC = () => {
     // Modo Campos
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
+        {/* Renderiza a Modal */}
+        <Modal
+          isOpen={modalState.isOpen}
+          onClose={closeModal}
+          title={modalState.title}
+          footer={
+            <>
+              {modalState.type === 'success' && (
+                <button
+                  onClick={closeModal}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  OK
+                </button>
+              )}
+              {modalState.type === 'error' && (
+                <button
+                  onClick={closeModal}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  Close
+                </button>
+              )}
+              {modalState.type === 'confirm' && (
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={closeModal}
+                    className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirm}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              )}
+            </>
+          }
+        >
+          <p>{modalState.message}</p>
+        </Modal>
+
         <main className="flex-grow container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             <div className="flex justify-between items-center mb-6">
@@ -382,14 +531,14 @@ const ManageDocumentFields: React.FC = () => {
                                     className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                                   />
                                 </div>
-                                 <div>
+                                <div>
                                   <label htmlFor={`editType_${field.id}`} className="block text-xs font-medium text-gray-700 mb-1">
                                     Type *
                                   </label>
                                   <select
                                     id={`editType_${field.id}`}
                                     name="field_type"
-                                    value={editingFieldData.field_type ?? 'TEXT'} // Valor padrão
+                                    value={editingFieldData.field_type ?? 'text'}
                                     onChange={handleChangeEditingField}
                                     required
                                     className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -401,19 +550,19 @@ const ManageDocumentFields: React.FC = () => {
                                     ))}
                                   </select>
                                 </div>
-                            <div className="flex items-center text-sm">
-                              <input
-                                id={`editRequired_${field.id}`}
-                                name="is_required" // <-- Corrigido
-                                type="checkbox"
-                                checked={!!editingFieldData.is_required} // <-- Corrigido
-                                onChange={handleChangeEditingField}
-                                className="h-3 w-3 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                              />
-                              <label htmlFor={`editRequired_${field.id}`} className="ml-1 text-gray-700">
-                                Required
-                              </label>
-                            </div>
+                                <div className="flex items-center text-sm">
+                                  <input
+                                    id={`editRequired_${field.id}`}
+                                    name="is_required"
+                                    type="checkbox"
+                                    checked={!!editingFieldData.is_required}
+                                    onChange={handleChangeEditingField}
+                                    className="h-3 w-3 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                  />
+                                  <label htmlFor={`editRequired_${field.id}`} className="ml-1 text-gray-700">
+                                    Required
+                                  </label>
+                                </div>
                                 <div className="flex space-x-2 pt-1">
                                   <button
                                     type="submit"
@@ -428,11 +577,19 @@ const ManageDocumentFields: React.FC = () => {
                                   >
                                     Cancel
                                   </button>
+                                  {/* Botão Delete também pode aparecer aqui, se quiser permitir deletar durante a edição */}
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteField(field.id)}
+                                    className="text-xs px-2 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded"
+                                  >
+                                    Delete
+                                  </button>
                                 </div>
                               </form>
                             </div>
                           ) : (
-                            // Renderiza os dados normais do campo e o botão de editar
+                            // Renderiza os dados normais do campo e os botões de editar/deletar
                             <div>
                               <div className="flex justify-between items-start">
                                 <div>
@@ -442,12 +599,20 @@ const ManageDocumentFields: React.FC = () => {
                                     Type: {field.field_type} | Required: {field.is_required ? 'Yes' : 'No'} | ID: {field.id}
                                   </div>
                                 </div>
-                                <button
-                                  onClick={() => startEditing(field)}
-                                  className="text-xs px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded"
-                                >
-                                  Edit
-                                </button>
+                                <div className="flex space-x-2"> {/* Wrapper para alinhar os botões */}
+                                  <button
+                                    onClick={() => startEditing(field)}
+                                    className="text-xs px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => deleteField(field.id)}
+                                    className="text-xs px-2 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           )}
@@ -490,14 +655,14 @@ const ManageDocumentFields: React.FC = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
-                     <div>
+                      <div>
                       <label htmlFor="newFieldType" className="block text-sm font-medium text-gray-700 mb-1">
                         Type *
                       </label>
                       <select
                         id="newFieldType"
-                        name="field_type"
-                        value={newFieldData.field_type}
+                        name="field_type" // <-- Corrigido
+                        value={newFieldData.field_type} // <-- Corrigido
                         onChange={handleChangeNewField}
                         required
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
