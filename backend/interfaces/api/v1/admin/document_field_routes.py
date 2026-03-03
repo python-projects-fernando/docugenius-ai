@@ -86,19 +86,19 @@ async def get_document_field_by_id(
     return await use_case.execute(field_id=id)
 
 
-@router.get(
-    "/by-document-type/{document_type_id}",
-    response_model=APIResponse[DocumentFieldListResponse],
-    status_code=status.HTTP_200_OK,
-    summary="List fields for a specific document type (Admin)",
-    description="Retrieves all fields associated with a given document type ID. Access restricted to administrators. Version: v1.",
-)
-async def list_document_fields_by_document_type(
-    document_type_id: int = Path(..., title="The ID of the DocumentType to list fields for"),
-    current_user: User = Depends(role_checker([UserRole.ADMIN])),
-    use_case: ListDocumentFieldsByDocumentTypeUseCase = Depends(get_list_document_fields_by_document_type_use_case)
-) -> APIResponse[DocumentFieldListResponse]:
-    return await use_case.execute(document_type_id=document_type_id)
+# @router.get(
+#     "/by-document-type/{document_type_id}",
+#     response_model=APIResponse[DocumentFieldListResponse],
+#     status_code=status.HTTP_200_OK,
+#     summary="List fields for a specific document type (Admin)",
+#     description="Retrieves all fields associated with a given document type ID. Access restricted to administrators. Version: v1.",
+# )
+# async def list_document_fields_by_document_type(
+#     document_type_id: int = Path(..., title="The ID of the DocumentType to list fields for"),
+#     current_user: User = Depends(role_checker([UserRole.ADMIN])),
+#     use_case: ListDocumentFieldsByDocumentTypeUseCase = Depends(get_list_document_fields_by_document_type_use_case)
+# ) -> APIResponse[DocumentFieldListResponse]:
+#     return await use_case.execute(document_type_id=document_type_id)
 
 @router.put(
     "/{id}",
