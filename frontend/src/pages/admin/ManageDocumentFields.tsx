@@ -146,7 +146,7 @@ const ManageDocumentFields: React.FC = () => {
         throw new Error('Access token not found in localStorage.');
       }
 
-      const response = await fetch(`${API_BASE_URL}/admin/document-fields/by-document-type/${docTypeId}`, {
+      const response = await fetch(`${API_BASE_URL}/user/document-fields/by-document-type/${docTypeId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
