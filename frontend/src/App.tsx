@@ -9,6 +9,8 @@ import ManageDocumentTypes from './pages/admin/ManageDocumentTypes';
 import CreateDocumentType from './pages/admin/CreateDocumentType';
 import EditDocumentType from './pages/admin/EditDocumentType';
 import ManageDocumentFields from './pages/admin/ManageDocumentFields';
+import SelectDocumentType from './pages/user/SelectDocumentType';
+import UploadAndFillFields from './pages/user/UploadAndFillFields';
 import type { User } from './types/auth';
 
 const HomePage = () => {
@@ -112,6 +114,22 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+
+            {/* ROTA PROTEGIDA PARA USUÁRIO COMUM (role: 'common') */}
+            <Route path="/generate" element={
+              <ProtectedRoute allowedRoles={['common']} currentUser={currentUser}>
+                <SelectDocumentType />
+              </ProtectedRoute>
+            } />
+
+            {/* ROTA PROTEGIDA PARA USUÁRIO COMUM - PREENCHIMENTO DE CAMPOS */}
+            <Route path="/generate/upload/:documentTypeId" element={
+              <ProtectedRoute allowedRoles={['common']} currentUser={currentUser}>
+                <UploadAndFillFields />
+              </ProtectedRoute>
+            } />
+
+            {/* Rotas de Admin */}
             <Route path="/admin/dashboard" element={
               <ProtectedRoute allowedRoles={['admin']} currentUser={currentUser}>
                 <AdminDashboard />

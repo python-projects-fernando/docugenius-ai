@@ -6,11 +6,13 @@ from backend.application.dtos.pagination_params import PaginationParams
 from backend.application.use_cases.document_type.generate_document_use_case import GenerateDocumentUseCase
 from backend.application.use_cases.document_type.get_document_type_by_id_use_case import GetDocumentTypeByIdUseCase
 from backend.application.use_cases.document_type.get_document_type_by_name_use_case import GetDocumentTypeByNameUseCase
+from backend.application.use_cases.document_type.get_document_types_with_fields_use_case import \
+    GetDocumentTypesWithFieldsUseCase
 from backend.application.use_cases.document_type.list_document_types_use_case import ListDocumentTypesUseCase
 from backend.core.enums.user_role_enum import UserRole
 from backend.core.models.user import User
 from backend.interfaces.dependencies import get_list_document_types_use_case, get_get_document_type_by_id_use_case, \
-    get_get_document_type_by_name_use_case, role_checker, get_generate_document_use_case
+    get_get_document_type_by_name_use_case, role_checker, get_generate_document_use_case, get_get_document_types_with_fields_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-types", tags=["Document Types - User/Admin"])
@@ -59,6 +61,22 @@ async def get_document_type_by_name(
     use_case: GetDocumentTypeByNameUseCase = Depends(get_get_document_type_by_name_use_case)
 ) -> APIResponse[DocumentTypeResponse]:
     return await use_case.execute(name=name)
+
+@router.get(
+    "/with-fields", # <-- NOVA ROTA
+    response_model=APIResponse[DocumentTypeListResponse],
+    status_code=status.HTTP_200_OK,
+    summary="List document types with associated fields (User)",
+    description="Lists document types that have associated fields configured, suitable for the user generation flow. Version: v1.",
+)
+async def list_document_types_with_fields(
+    page: int = Query(default=1, ge=1, description="Page number (1-indexed)."),
+    size: int = Query(default=10, ge=1, le=100, description="Number of items per page (max 100)."),
+    current_user: User = Depends(role_checker([UserRole.COMMON_USER])),
+    use_case: GetDocumentTypesWithFieldsUseCase = Depends(get_get_document_types_with_fields_use_case)
+) -> APIResponse[DocumentTypeListResponse]:
+    pagination_params = PaginationParams(page=page, size=size)
+    return await use_case.execute(pagination=pagination_params)
 
 @router.post(
     "/generate-document",

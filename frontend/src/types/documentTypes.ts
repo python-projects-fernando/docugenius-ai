@@ -4,6 +4,22 @@ export interface DocumentType {
   description: string;
 }
 
+export interface GenerateDocumentRequest {
+  document_type_id: number;
+  filled_fields: Record<string, any>;
+}
+
+export interface GenerateDocumentResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    location_identifier?: string;
+    download_url?: string;
+  };
+  error_code: string | null;
+  errors: string[] | null;
+}
+
 export interface DocumentField {
   id: number;
   name: string;

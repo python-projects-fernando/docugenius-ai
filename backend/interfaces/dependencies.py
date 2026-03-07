@@ -29,6 +29,8 @@ from backend.application.use_cases.document_type.delete_document_type_use_case i
 from backend.application.use_cases.document_type.generate_document_use_case import GenerateDocumentUseCase
 from backend.application.use_cases.document_type.get_document_type_by_id_use_case import GetDocumentTypeByIdUseCase
 from backend.application.use_cases.document_type.get_document_type_by_name_use_case import GetDocumentTypeByNameUseCase
+from backend.application.use_cases.document_type.get_document_types_with_fields_use_case import \
+    GetDocumentTypesWithFieldsUseCase
 from backend.application.use_cases.document_type.list_document_types_use_case import ListDocumentTypesUseCase
 from backend.application.use_cases.document_type.suggest_document_types_use_case import SuggestDocumentTypesUseCase
 from backend.application.use_cases.document_type.update_document_type_use_case import UpdateDocumentTypeUseCase
@@ -207,6 +209,12 @@ def get_list_document_types_use_case(
     repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
 ) -> ListDocumentTypesUseCase:
     return ListDocumentTypesUseCase(repository=repository)
+
+def get_get_document_types_with_fields_use_case(
+    repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
+) -> GetDocumentTypesWithFieldsUseCase:
+    return GetDocumentTypesWithFieldsUseCase(repository=repository)
+
 
 def get_get_document_type_by_id_use_case(
     repository: Annotated[DocumentTypeRepository, Depends(get_mysql_document_type_repository)]
