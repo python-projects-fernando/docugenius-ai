@@ -11,7 +11,6 @@ const SelectDocumentType: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // Função para buscar os tipos de documento
   const fetchDocumentTypes = async () => {
     try {
       setLoading(true);
@@ -53,15 +52,11 @@ const SelectDocumentType: React.FC = () => {
     }
   };
 
-  // Carrega os tipos ao montar o componente
   useEffect(() => {
     fetchDocumentTypes();
   }, []);
 
-  // Função chamada quando um tipo é selecionado
   const handleSelect = (type: DocumentType) => {
-    // Navega para a próxima tela, passando o ID do tipo
-    // Exemplo de rota: /generate/upload/:id
     navigate(`/generate/upload/${type.id}`);
   };
 
@@ -74,7 +69,6 @@ const SelectDocumentType: React.FC = () => {
             Choose the type of document you want to generate.
           </p>
 
-          {/* Renderiza o seletor de tipos */}
           <DocumentTypeSelector
             documentTypes={documentTypes}
             onSelect={handleSelect}

@@ -6,13 +6,11 @@ from backend.application.dtos.pagination_params import PaginationParams
 from backend.application.use_cases.document_type.generate_document_use_case import GenerateDocumentUseCase
 from backend.application.use_cases.document_type.get_document_type_by_id_use_case import GetDocumentTypeByIdUseCase
 from backend.application.use_cases.document_type.get_document_type_by_name_use_case import GetDocumentTypeByNameUseCase
-from backend.application.use_cases.document_type.get_document_types_with_fields_use_case import \
-    GetDocumentTypesWithFieldsUseCase
+from backend.application.use_cases.document_type.get_document_types_with_fields_use_case import GetDocumentTypesWithFieldsUseCase
 from backend.application.use_cases.document_type.list_document_types_use_case import ListDocumentTypesUseCase
 from backend.core.enums.user_role_enum import UserRole
 from backend.core.models.user import User
-from backend.interfaces.dependencies import get_list_document_types_use_case, get_get_document_type_by_id_use_case, \
-    get_get_document_type_by_name_use_case, role_checker, get_generate_document_use_case, get_get_document_types_with_fields_use_case
+from backend.interfaces.dependencies import get_list_document_types_use_case, get_get_document_type_by_id_use_case, get_get_document_type_by_name_use_case, role_checker, get_generate_document_use_case, get_get_document_types_with_fields_use_case
 from backend.application.dtos.api_response import APIResponse
 
 router = APIRouter(prefix="/document-types", tags=["Document Types - User/Admin"])
@@ -63,7 +61,7 @@ async def get_document_type_by_name(
     return await use_case.execute(name=name)
 
 @router.get(
-    "/with-fields", # <-- NOVA ROTA
+    "/with-fields",
     response_model=APIResponse[DocumentTypeListResponse],
     status_code=status.HTTP_200_OK,
     summary="List document types with associated fields (User)",

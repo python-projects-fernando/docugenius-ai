@@ -115,21 +115,21 @@ const App: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
 
-            {/* ROTA PROTEGIDA PARA USUÁRIO COMUM (role: 'common') */}
+
             <Route path="/generate" element={
               <ProtectedRoute allowedRoles={['common']} currentUser={currentUser}>
                 <SelectDocumentType />
               </ProtectedRoute>
             } />
 
-            {/* ROTA PROTEGIDA PARA USUÁRIO COMUM - PREENCHIMENTO DE CAMPOS */}
+
             <Route path="/generate/upload/:documentTypeId" element={
               <ProtectedRoute allowedRoles={['common']} currentUser={currentUser}>
                 <UploadAndFillFields />
               </ProtectedRoute>
             } />
 
-            {/* Rotas de Admin */}
+
             <Route path="/admin/dashboard" element={
               <ProtectedRoute allowedRoles={['admin']} currentUser={currentUser}>
                 <AdminDashboard />

@@ -58,11 +58,9 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         if (userRole === 'admin') {
           navigate('/admin/dashboard');
         } else if (userRole === 'common') {
-          navigate('/generate'); // <--- ALTERADO AQUI
+          navigate('/generate');
         } else {
-          // Idealmente, isso não deveria acontecer se os roles forem bem definidos.
-          // Poderia redirecionar para login ou uma página de erro.
-          navigate('/login'); // Ou '/unauthorized' se tiver uma
+          navigate('/login');
         }
 
       } else {
