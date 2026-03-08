@@ -1,0 +1,57 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.0.3 Chrome/140.0.7339.249 Electron/38.7.0 Safari/537.36" version="29.0.3">
+  <diagram name="Page-1" id="FlFeuR-VkUrGM3TlLg44">
+    <mxGraphModel dx="1281" dy="626" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="U5SBr-2DKTlIwD6_K5KG-1" value="Browser" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="268" y="20" width="117" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="U5SBr-2DKTlIwD6_K5KG-2" value="Frontend App" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="249" y="124" width="156" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="U5SBr-2DKTlIwD6_K5KG-3" value="Components &amp; UI" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="20" y="228" width="184" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="U5SBr-2DKTlIwD6_K5KG-4" value="API Services" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="254" y="228" width="146" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="U5SBr-2DKTlIwD6_K5KG-5" value="State &amp; Types" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="450" y="228" width="158" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="U5SBr-2DKTlIwD6_K5KG-6" value="Backend API" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="253" y="332" width="147" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="U5SBr-2DKTlIwD6_K5KG-7" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" edge="1" parent="1" source="U5SBr-2DKTlIwD6_K5KG-1" target="U5SBr-2DKTlIwD6_K5KG-2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="U5SBr-2DKTlIwD6_K5KG-8" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0;exitY=0.85;entryX=0.5;entryY=0;rounded=0;" edge="1" parent="1" source="U5SBr-2DKTlIwD6_K5KG-2" target="U5SBr-2DKTlIwD6_K5KG-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="112" y="203" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="U5SBr-2DKTlIwD6_K5KG-9" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" edge="1" parent="1" source="U5SBr-2DKTlIwD6_K5KG-2" target="U5SBr-2DKTlIwD6_K5KG-4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="U5SBr-2DKTlIwD6_K5KG-10" value="" style="curved=1;startArrow=none;endArrow=block;exitX=1;exitY=0.87;entryX=0.5;entryY=0;rounded=0;" edge="1" parent="1" source="U5SBr-2DKTlIwD6_K5KG-2" target="U5SBr-2DKTlIwD6_K5KG-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="528" y="203" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="U5SBr-2DKTlIwD6_K5KG-11" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" edge="1" parent="1" source="U5SBr-2DKTlIwD6_K5KG-4" target="U5SBr-2DKTlIwD6_K5KG-6">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
