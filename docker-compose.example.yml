@@ -39,7 +39,7 @@ services:
       JWT_REFRESH_SECRET_KEY: "fake_super_secret_refresh_key_for_dev"
       ACCESS_TOKEN_EXPIRE_MINUTES: "30"
       REFRESH_TOKEN_EXPIRE_DAYS: "7"
-      DATABASE_URL: "mysql+aiomysql://dev_user:fakeUserPassword456%@db:3306/docugenius_ai_dev"
+      DATABASE_URL: "mysql+aiomysql://dev_user:fakeUserPassword456%@db:3306/docugenius_ai"
       HF_API_TOKEN: "hf_fakeTokenForExampleAbCdEfGhIjKlMnOpQrStUvWxYz"
       HF_OPENAI_BASE_URL: "https://fake-router.huggingface.co/v1"
       AWS_ACCESS_KEY_ID: "FAKEAKIAXXXXXXXXXXX"
