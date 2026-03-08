@@ -18,7 +18,6 @@ import os
 from dotenv import load_dotenv
 import logging
 
-
 load_dotenv()
 logger = logging.getLogger(__name__)
 
@@ -70,10 +69,42 @@ async def lifespan(app: FastAPI):
         else:
             print(f"Admin user 'admin' already exists (ID: {existing_admin_user.id}). Skipping initial admin creation.")
 
+        existing_common_user = await user_repo.find_by_username("common")
 
+        if not existing_common_user:
+            print("No common user found. Creating initial common user directly via repository...")
 
+            initial_common_password = os.getenv("INITIAL_USER_PASSWORD")
+            if not initial_common_password:
+                logger.error("INITIAL_USER_PASSWORD not set in environment.")
+                raise ValueError("INITIAL_USER_PASSWORD environment variable is required for initial common creation.")
 
+            import bcrypt
+            password_hash_bytes = bcrypt.hashpw(initial_common_password.encode('utf-8'), bcrypt.gensalt())
+            password_hash_str = password_hash_bytes.decode('utf-8')
 
+            from backend.core.value_objects.hashed_password import HashedPassword
+            hashed_password_vo = HashedPassword(value=password_hash_str)
+
+            from backend.core.enums.user_role_enum import UserRole
+
+            initial_common_entity = User(
+                id=None,
+                username="common",
+                email="common@docugeniusai.local",
+                hashed_password=hashed_password_vo,
+                role=UserRole.COMMON_USER,
+                is_active=True,
+                created_by_user_id=None
+            )
+
+            saved_common_entity = await user_repo.save(initial_common_entity)
+
+            print(
+                f"Initial common user created successfully. Username: {saved_common_entity.username}, ID: {saved_common_entity.id}")
+            print("*** IMPORTANT: Change this password immediately after your first login! ***")
+        else:
+            print(f"Common user 'common' already exists (ID: {existing_common_user.id}). Skipping initial common creation.")
 
     print("Application started successfully!")
     yield
@@ -108,6 +139,7 @@ app.include_router(user_router, prefix="/api/v1/admin")
 @app.get("/")
 async def root():
     return {"message": "DocuGeniusAI API is running!"}
+
 
 @app.get("/health")
 async def health_check():
