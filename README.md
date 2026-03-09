@@ -25,6 +25,20 @@ Perfect for: Legal, Financial, Consulting, Healthcare, Insurance, Government Age
 - **Role-Based Access Control (RBAC):** Separate environments and permissions for administrators and common users.
 - **Secure & Scalable:** Built with security best practices and designed for horizontal scaling.
 
+### Default User Credentials (For Testing)
+
+After the initial application startup, two default users are created automatically:
+
+**Admin User:**
+*   **Username:** `admin`
+*   **Password:** `UniqueSecretSuperPaSSword92!37`
+
+**Common User:**
+*   **Username:** `common`
+*   **Password:** `PaSSword92!37`
+
+Use these credentials to log in and explore the admin and user functionalities respectively.
+
 ## Experience the Flow
 
 Ready to automate your document generation process?  
@@ -170,6 +184,35 @@ If you prefer to run the backend and frontend services directly on your host mac
         npm run dev
         ```
         The **Frontend** will be available at **http://localhost:5173** (or another port if 5173 is taken, Vite will show the correct number in the terminal).
+
+---
+
+### Running Tests
+
+To ensure code quality and functionality, DocuGenius-AI includes unit tests. You can run them using `pytest`.
+
+1. **Run the tests from the root `docugenius-ai` directory** (where `docugenius-ai/backend/` and `docugenius-ai/frontend/` are located):
+    *   **On Windows using PowerShell:**
+        ```powershell
+        # From the docugenius-ai root directory (not the backend subdirectory)
+        $env:PYTHONPATH = ".\backend"; python -m pytest .\backend\tests\unit\test_core\test_models\
+        ```
+    *   **On Windows using Command Prompt (cmd):**
+        ```cmd
+        # From the docugenius-ai root directory (not the backend subdirectory)
+        set PYTHONPATH=.\\backend && python -m pytest .\\backend\\tests\\unit\\test_core\\test_models\\
+        ```
+    *   **On macOS/Linux/WSL using Git Bash:**
+        ```bash
+        # From the docugenius-ai root directory (not the backend subdirectory)
+        PYTHONPATH="./backend" python -m pytest ./backend/tests/unit/test_core/test_models/
+        ```
+    *   **Alternatively, if your environment is set up correctly (e.g., backend package installed in editable mode):**
+        ```bash
+        pytest backend/tests/unit/test_core/test_models/
+        ```
+
+This command will discover and run all unit tests located in the `backend/tests/unit/test_core/test_models/` directory.
 
 ---
 
