@@ -1,7 +1,7 @@
 # DocuGeniusAI: AI-Driven Document Engineering Platform
 
 <p align="center">
-  <img src="docs/images/docugenius-ai-logo.png" alt="DocuGenius AI Logo" width="250" height="200">
+  <img src="https://assets.zyrosite.com/AQEZkE43zXtgRjLB/docugenius-ai-logo-kteCwjiZWTiZ6Rey.png" alt="DocuGenius AI Logo" width="300">
 </p>
 
 **DocuGeniusAI** transforms how businesses create personalized documents. It bridges the gap between unstructured business requirements and structured, AI-powered document generation. Administrators define document schemas, and users fill dynamic forms to generate professional, compliant documents instantly.
